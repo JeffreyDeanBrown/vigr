@@ -15,23 +15,26 @@ curses.curs_set(0)
 
 
 def main(stdscr):
-
+    # initial setup
     curses.echo()
     render_screen()
 
     while True:
+        # wait for user input
         curses.curs_set(0)
-
         act = stdscr.getch(curses.LINES-1,curses.COLS-5)
 
         if act == curses.KEY_RESIZE:
             curses.update_lines_cols()
             render_screen()
+
         if act == ord(":"):
+            # setup for : command
             windows.load_cmd(":")
             curses.curs_set(1)
             curses.echo()
             cmd = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
+
             if cmd == 'l':
                 windows.dna.update_text(new_text = "║\n")
                 windows.load_dna()
@@ -45,11 +48,13 @@ def main(stdscr):
                 windows.dna.update_text("┣┅┅┅┫\n"\
                                         "┃   ┃\n")
                 windows.load_dna()
+
             elif cmd == chr(curses.KEY_RESIZE):
                 curses.update_lines_cols()
                 render_screen()
+
             elif cmd == 'q':
-                break
+                break # thank you and have a good one
 
 
 def render_screen():
