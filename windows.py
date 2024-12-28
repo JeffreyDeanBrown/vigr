@@ -15,12 +15,15 @@ class TextArt:
         expanded_lines = self.lines * (max_y // self.y + 1)
         return(''.join(expanded_lines[:max_y]))
 
+    def update_text(self, new_text, file_name = False):
+        self.__init__(text = new_text, file_name = file_name)
+
 
 _strand = TextArt("text_art.txt", file_name = True)
-_dna = TextArt("├┄┤\n")
+dna = TextArt("├┄┤\n")
 
 
-def load_dna(dna = _dna):
+def load_dna():
     w_dna = curses.newwin(curses.LINES, 10, 1, 40)
     w_dna.addstr(dna.fill(curses.LINES-3))
     w_dna.noutrefresh()

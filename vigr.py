@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import curses
 import windows
 
@@ -31,18 +33,18 @@ def main(stdscr):
             curses.echo()
             cmd = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
             if cmd == 'l':
-                dna = windows.TextArt("║\n")
-                windows.load_dna(dna)
+                windows.dna.update_text(new_text = "║\n")
+                windows.load_dna()
             elif cmd == 's':
-                dna = windows.TextArt("││\n")
-                windows.load_dna(dna)
+                windows.dna.update_text(new_text = "││\n")
+                windows.load_dna()
             elif cmd == 'm':
-                dna = windows.TextArt("├┄┤\n")
-                windows.load_dna(dna)
+                windows.dna.update_text("├┄┤\n")
+                windows.load_dna()
             elif cmd == 'b':
-                dna = windows.TextArt("┣┅┅┅┫\n"\
-                              "┃   ┃\n")
-                windows.load_dna(dna)
+                windows.dna.update_text("┣┅┅┅┫\n"\
+                                        "┃   ┃\n")
+                windows.load_dna()
             elif cmd == chr(curses.KEY_RESIZE):
                 curses.update_lines_cols()
                 render_screen()
