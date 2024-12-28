@@ -1,5 +1,13 @@
 import curses
 
+"""
+TODO:   -move main loop to function, call with wrapper()
+        -add window resize keystroke
+        -implement a list of keystrokes and :* functions
+        -implement filesize, sequence sizing, and scrolling
+        -*organize*
+"""
+
 stdscr = curses.initscr()
 # curses.noecho()
 curses.cbreak() # instantly react to keys
