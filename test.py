@@ -11,7 +11,7 @@ TODO:   -move main loop to function, call with wrapper()
 stdscr = curses.initscr()
 # curses.noecho()
 curses.cbreak() # instantly react to keys
-stdscr.refresh()
+
 
 curses.curs_set(0)
 class TextArt:
@@ -32,39 +32,47 @@ class TextArt:
 
 strand = TextArt("text_art.txt", file_name = True)
 dna = TextArt("├┄┤\n")
-# p_strand = curses.newpad(strand.y, strand.x)
-# p_strand.addstr(strand.text)
-# p_strand.refresh(0,0,0,0,curses.LINES-1, strand.x)
 
-w_strand = curses.newwin(curses.LINES-2, 30, 0, 0)
-w_strand.addstr(strand.fill(curses.LINES-3))
-w_strand.border()
-w_strand.noutrefresh()
 
 def load_dna(dna):
-    w_dna = curses.newwin(curses.LINES-2, 10, 1, 40)
+    w_dna = curses.newwin(curses.LINES, 10, 1, 40)
     w_dna.addstr(dna.fill(curses.LINES-4))
     w_dna.noutrefresh()
 
-load_dna(dna)
+
+def load_strand(strand):
+    w_strand = curses.newwin(curses.LINES-2, 30, 0, 0)
+    w_strand.addstr(strand.fill(curses.LINES-3))
+    w_strand.border()
+    w_strand.noutrefresh()
+
 
 def load_cmd(input = None):
-    w_cmd = curses.newwin(1, curses.COLS-1, curses.LINES-2, 0)
-    if input == None:
-        w_cmd.addstr(" " * (curses.COLS-2))
+    w_cmd = curses.newwin(1, curses.COLS, curses.LINES, 0)
+    buffer_ = " " * (curses.COLS - 1)
+    if (input == None):
+        w_cmd.addstr(buffer_)
     else:
-        w_cmd.addstr(input)
+        buffer_ = input
+        load_cmd()
     w_cmd.noutrefresh()
 
-load_cmd()
+
+def load_screen():
+    stdscr.refresh()
+    load_strand(strand)
+    load_dna(dna)
+    load_cmd()
 
 while True:
-    curses.doupdate()
+
+    curses.update_lines_cols()
+    load_screen()
     curses.curs_set(0)
     curses.noecho()
-    act = stdscr.getkey(curses.LINES-1,0)
-    if act == ":":
-        load_cmd()
+
+    act = stdscr.getch(curses.LINES-1,0)
+    if act == ord(":"):
         load_cmd(":")
         curses.curs_set(1)
         curses.echo()
