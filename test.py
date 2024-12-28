@@ -2,7 +2,6 @@ import curses
 
 """
 TODO:   -move main loop to function, call with wrapper()
-        -add window resize keystroke
         -implement a list of keystrokes and :* functions
         -implement filesize, sequence sizing, and scrolling
         -*organize*
@@ -36,47 +35,51 @@ dna = TextArt("├┄┤\n")
 
 def load_dna(dna):
     w_dna = curses.newwin(curses.LINES, 10, 1, 40)
-    w_dna.addstr(dna.fill(curses.LINES-4))
+    w_dna.addstr(dna.fill(curses.LINES-3))
     w_dna.noutrefresh()
 
 
 def load_strand(strand):
-    w_strand = curses.newwin(curses.LINES-2, 30, 0, 0)
-    w_strand.addstr(strand.fill(curses.LINES-3))
+    w_strand = curses.newwin(curses.LINES-1, 30, 0, 0)
+    w_strand.addstr(strand.fill(curses.LINES-2))
     w_strand.border()
     w_strand.noutrefresh()
 
 
-def load_cmd(input = None):
-    w_cmd = curses.newwin(1, curses.COLS, curses.LINES, 0)
-    buffer_ = " " * (curses.COLS - 1)
-    if (input == None):
-        w_cmd.addstr(buffer_)
+
+
+def load_cmd(input = None, refresh_only = False):
+    w_cmd = curses.newwin(1, curses.COLS, curses.LINES-1, 0)
+    if (input == None) & (not refresh_only):
+        w_cmd.addstr(" " * (curses.COLS-1))
+    elif refresh_only:
+        pass
     else:
-        buffer_ = input
-        load_cmd()
+        w_cmd.addstr(input)
     w_cmd.noutrefresh()
 
 
-def load_screen():
+def render_screen():
     stdscr.refresh()
     load_strand(strand)
     load_dna(dna)
-    load_cmd()
+    load_cmd(refresh_only = True)
+
+render_screen()
 
 while True:
-
-    curses.update_lines_cols()
-    load_screen()
     curses.curs_set(0)
-    curses.noecho()
 
-    act = stdscr.getch(curses.LINES-1,0)
+    act = stdscr.getch(curses.LINES-1,curses.COLS-5)
+
+    if act == curses.KEY_RESIZE:
+        curses.update_lines_cols()
+        render_screen()
     if act == ord(":"):
         load_cmd(":")
         curses.curs_set(1)
         curses.echo()
-        cmd = stdscr.getstr(curses.LINES-2, 1).decode('utf-8')
+        cmd = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
         if cmd == 'l':
             dna = TextArt("║\n")
             load_dna(dna)
@@ -96,6 +99,9 @@ while True:
             curses.echo()
             curses.endwin()
             break
+        else:
+            curses.update_lines_cols()
+            render_screen()
 
 
 # cmd_line = curses.newwin(1, curses.COLS-1, curses.LINES-1, 0)
