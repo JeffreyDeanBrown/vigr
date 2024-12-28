@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import curses
-import windows
+import windows, functions
 
 """
 TODO:   -implement a list of keystrokes and :* functions
@@ -34,20 +34,9 @@ def main(stdscr):
             curses.curs_set(1)
             curses.echo()
             cmd = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
-
-            if cmd == 'l':
-                windows.dna.update_text(new_text = "║\n")
-                windows.load_dna()
-            elif cmd == 's':
-                windows.dna.update_text(new_text = "││\n")
-                windows.load_dna()
-            elif cmd == 'm':
-                windows.dna.update_text("├┄┤\n")
-                windows.load_dna()
-            elif cmd == 'b':
-                windows.dna.update_text("┣┅┅┅┫\n"\
-                                        "┃   ┃\n")
-                windows.load_dna()
+            if cmd in functions.ex_cmds:
+                run_it = functions.ex_cmds[cmd]
+                run_it()
 
             elif cmd == chr(curses.KEY_RESIZE):
                 curses.update_lines_cols()
