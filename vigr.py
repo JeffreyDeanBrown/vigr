@@ -6,6 +6,7 @@ import windows, commands
 """
 TODO:   -make scaling relative to filesize
         -add command history
+        -add constants to represent window sizes and stuff
 """
 
 # initialize curses
