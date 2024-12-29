@@ -4,7 +4,8 @@ import curses
 import windows, commands
 
 """
-TODO:   -implement filesize, sequence sizing, and scrolling
+TODO:   -make scaling relative to filesize
+        -add command history
 """
 
 # initialize curses
