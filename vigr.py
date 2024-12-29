@@ -4,16 +4,20 @@ import curses
 import windows, commands
 
 """
-TODO:   -make scaling relative to filesize & implement location highlights
-        -implement gg + G + \d*gg searching
+TODO:   -implement gg + G + \d*gg searching
         -implement subroutine for getting messages to user
         -add command history
-        -add constants to represent window sizes and stuff
-        -implement offset + scale commands based on \d*\Ddb | \d*db format
+        -layout window positions in WINDOWS comments and convert to constants
+        -implement indexing + offset commands based on \d*\Ddb | \d*db format
         -implement keystroke scrolling + page scrolling
+        -add major and minor axis lines to strand ruler + labels
 
 FIXME:  -invalid escape sequence SyntaxWarning when :q
+      WINDOWS:
         -figure out curses.LINES - 1 reasoning and fix comments
+        -also, all the mess with offsets and -1 -2, etc
+      COMMANDS:
+        -can currently set scale to 0 (implement minimum dna offset)
 """
 
 # initialize curses

@@ -1,11 +1,12 @@
 import curses
 import files
+import math
 
 #-----------------------------------------------------------------------
 class TextArt:
 
-    buffer = 0
-    scale = 1000
+    index = 0
+    offset = 1000
 
     def __init__(self, text, file_name = False):
         if file_name:
@@ -42,21 +43,21 @@ def load_dna():
     w_dna.noutrefresh()
 
 
-    if dna.buffer >= 10_000_000:
-        dna_min = str(round(dna.buffer / 10_000_000))\
+    if dna.index >= 10_000_000:
+        dna_min = str(round(dna.index / 10_000_000))\
                   + "mpb"
-    elif dna.buffer < 10_000:
-        dna_min = '{:,}'.format(dna.buffer) + "bp"
+    elif dna.index < 10_000:
+        dna_min = '{:,}'.format(dna.index) + "bp"
     else:
-        dna_min = '{:,}'.format(round((dna.buffer / 1_000)))\
+        dna_min = '{:,}'.format(round((dna.index / 1_000)))\
                   + "kpb"
-    if (dna.buffer + dna.scale) >= 10_000_000:
-        dna_max = str(round((dna.buffer + dna.scale) / 1_000_000))\
+    if (dna.index + dna.offset) >= 10_000_000:
+        dna_max = str(round((dna.index + dna.offset) / 1_000_000))\
                   + "mpb"
-    elif (dna.buffer + dna.scale) < 10_000:
-        dna_max = '{:,}'.format((dna.buffer + dna.scale)) + "bp"
+    elif (dna.index + dna.offset) < 10_000:
+        dna_max = '{:,}'.format((dna.index + dna.offset)) + "bp"
     else:
-        dna_max = '{:,}'.format(round((dna.buffer + dna.scale) / 1_000))\
+        dna_max = '{:,}'.format(round((dna.index + dna.offset) / 1_000))\
                   + "kpb"
 
 
@@ -75,12 +76,12 @@ def load_strand(strand = _strand):
 
     WSTRAND_X = 30
     WSTRAND_Y = curses.LINES - 1 # so border isn't cut off by cmd line
-    STRAND_STRING_Y = WSTRAND_Y - 2 # for borders
+    STRAND_STRING_Y = WSTRAND_Y - 1 # for borders
+
 
     w_strand = curses.newwin(WSTRAND_Y, WSTRAND_X, 0, 0)
     w_strand.addstr(strand.fill(STRAND_STRING_Y))
     w_strand.border()
-    w_strand.noutrefresh()
 
 
     WSTRAND_RULER_Y = WSTRAND_Y - 2 # for borders
@@ -90,6 +91,27 @@ def load_strand(strand = _strand):
     w_strand_ruler.addstr("┬0bp\n"\
                      + "│\n" * (WSTRAND_RULER_Y - 2)\
                      + "┴" + '{:,}'.format(files.sequence_length) + "bp")
+
+    strand.index = math.floor((dna.index / files.sequence_length) * STRAND_STRING_Y)
+    # FIXME
+    # I think index starts at 0, but STRAND_STRING_Y starts at 1
+    if strand.index == STRAND_STRING_Y - 1:
+        strand.index -= 1 #dont hit that border, now!
+    strand.offset = math.floor((dna.offset / files.sequence_length) * STRAND_STRING_Y)
+    # FIXME
+    # but not for offset I don't think
+    if strand.offset == STRAND_STRING_Y:
+        strand.offset -= 1
+
+    w_strand.chgat(strand.index+1, 1, (WSTRAND_X - 2), curses.A_BLINK)
+    for lines in range(strand.offset):
+        w_strand.chgat(strand.index+1+lines, 1, (WSTRAND_X - 2), curses.A_BLINK)
+
+    w_strand_ruler.chgat(strand.index, 0, (WSTRAND_X - 2), curses.A_REVERSE)
+    for lines in range(strand.offset):
+        w_strand_ruler.chgat(strand.index+lines, 0, (WSTRAND_X - 2), curses.A_REVERSE)
+
+    w_strand.noutrefresh()
     w_strand_ruler.noutrefresh()
 
 #-----------------------------------------------------------------------
