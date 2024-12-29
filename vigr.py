@@ -3,12 +3,18 @@
 import curses
 import windows, commands
 
+def debug(stdscr):
+    curses.nocbreak()
+    stdscr.keypad(0)
+    curses.echo()
+    curses.endwin()
+    import pdb; pdb.set_trace()
+
 """
 TODO:   -implement gg + G + \d*gg searching
         -implement subroutine for getting messages to user
         -add command history
         -layout window positions in WINDOWS comments and convert to constants
-        -implement indexing + offset commands based on \d*\Ddb | \d*db format
         -implement keystroke scrolling + page scrolling
         -add major and minor axis lines to strand ruler + labels
 
@@ -18,6 +24,7 @@ FIXME:  -invalid escape sequence SyntaxWarning when :q
         -also, all the mess with offsets and -1 -2, etc
       COMMANDS:
         -can currently set scale to 0 (implement minimum dna offset)
+        -make comma and bp parsing DRY
 """
 
 # initialize curses
