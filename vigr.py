@@ -5,8 +5,11 @@ import windows, commands
 
 """
 TODO:   -make scaling relative to filesize
+        -implement gg + G + \d*gg searching
         -add command history
         -add constants to represent window sizes and stuff
+        -implement offset + scale commands based on \d*\Ddb | \d*db format
+        -implement keystroke scrolling + page scrolling
 """
 
 # initialize curses

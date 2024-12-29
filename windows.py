@@ -1,6 +1,8 @@
 import curses
 import files
 
+#-----------------------------------------------------------------------
+
 class TextArt:
 
     buffer = 0
@@ -28,6 +30,7 @@ class TextArt:
 _strand = TextArt("text_art.txt", file_name = True)
 dna = TextArt("├┄┤\n")
 
+#-----------------------------------------------------------------------
 
 def load_dna():
     w_dna = curses.newwin(curses.LINES, 10, 1, 40)
@@ -59,6 +62,7 @@ def load_dna():
                       +'{:>8}'.format(dna_max))
     w_dna_ruler.noutrefresh()
 
+#-----------------------------------------------------------------------
 
 def load_strand(strand = _strand):
     w_strand = curses.newwin(curses.LINES-1, 30, 0, 0)
@@ -72,8 +76,7 @@ def load_strand(strand = _strand):
                      + "┴" + '{:,}'.format(files.sequence_length) + "bp")
     w_file_size.noutrefresh()
 
-
-
+#-----------------------------------------------------------------------
 
 def load_cmd(input = None, refresh_only = False):
     w_cmd = curses.newwin(1, curses.COLS, curses.LINES-1, 0)

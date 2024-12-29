@@ -36,8 +36,9 @@ def scale_dna(range_):
     else:
         big_dna()
 
-ex_commands = {}
 
+ex_commands = {}
+vigr_commands = {}
 
 def check_ex_commands(cmd): #cmd comes in as a character string
     if cmd in ex_commands:
@@ -49,4 +50,3 @@ def check_ex_commands(cmd): #cmd comes in as a character string
         scale_dna(cmd)
 
 
-vigr_commands = {}
