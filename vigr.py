@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
 import curses
-import windows, functions
+import windows, commands
 
 """
-TODO:   -implement a list of keystrokes and :* functions
-        -implement filesize, sequence sizing, and scrolling
+TODO:   -implement filesize, sequence sizing, and scrolling
 """
 
 # initialize curses
@@ -22,28 +21,33 @@ def main(stdscr):
     while True:
         # wait for user input
         curses.curs_set(0)
-        act = stdscr.getch(curses.LINES-1,curses.COLS-5)
+        # usr input as decimal value
+        key = stdscr.getch(curses.LINES-1,curses.COLS-5)
 
-        if act == curses.KEY_RESIZE:
+        if key == curses.KEY_RESIZE:
             curses.update_lines_cols()
             render_screen()
 
-        if act == ord(":"):
+        elif key in commands.vigr_commands:
+            pass
+
+        elif key == ord(":"):
             # setup for : command
             windows.load_cmd(":")
             curses.curs_set(1)
             curses.echo()
-            cmd = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
-            if cmd in functions.ex_cmds:
-                run_it = functions.ex_cmds[cmd]
-                run_it()
+            ex = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
 
-            elif cmd == chr(curses.KEY_RESIZE):
+            if ex == chr(curses.KEY_RESIZE):
                 curses.update_lines_cols()
                 render_screen()
 
-            elif cmd == 'q':
-                break # thank you and have a good one
+            elif ex == 'q':
+                break # thank you have a good one
+
+            else:
+                commands.check_ex_commands(ex)
+
 
 
 def render_screen():

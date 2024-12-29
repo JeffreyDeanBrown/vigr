@@ -1,6 +1,11 @@
 import curses
+import files
 
 class TextArt:
+
+    buffer = 0
+    scale = 1000
+
     def __init__(self, text, file_name = False):
         if file_name:
             with open(text) as file_:
@@ -15,6 +20,7 @@ class TextArt:
         expanded_lines = self.lines * (max_y // self.y + 1)
         return(''.join(expanded_lines[:max_y]))
 
+
     def update_text(self, new_text, file_name = False):
         self.__init__(text = new_text, file_name = file_name)
 
@@ -28,12 +34,45 @@ def load_dna():
     w_dna.addstr(dna.fill(curses.LINES-3))
     w_dna.noutrefresh()
 
+    w_dna_ruler = curses.newwin(curses.LINES, 9, 1, 31)
+
+    if dna.buffer >= 10_000_000:
+        dna_min = str(round(dna.buffer / 10_000_000))\
+                  + "mpb"
+    elif dna.buffer < 10_000:
+        dna_min = '{:,}'.format(dna.buffer) + "bp"
+    else:
+        dna_min = '{:,}'.format(round((dna.buffer / 1_000)))\
+                  + "kpb"
+
+    if (dna.buffer + dna.scale) >= 10_000_000:
+        dna_max = str(round((dna.buffer + dna.scale) / 1_000_000))\
+                  + "mpb"
+    elif (dna.buffer + dna.scale) < 10_000:
+        dna_max = '{:,}'.format((dna.buffer + dna.scale)) + "bp"
+    else:
+        dna_max = '{:,}'.format(round((dna.buffer + dna.scale) / 1_000))\
+                  + "kpb"
+
+    w_dna_ruler.addstr('{:>8}'.format(dna_min) + "\n"\
+                      +"       │\n" * (curses.LINES-5)\
+                      +'{:>8}'.format(dna_max))
+    w_dna_ruler.noutrefresh()
+
 
 def load_strand(strand = _strand):
     w_strand = curses.newwin(curses.LINES-1, 30, 0, 0)
     w_strand.addstr(strand.fill(curses.LINES-2))
     w_strand.border()
     w_strand.noutrefresh()
+
+    w_file_size = curses.newwin(curses.LINES-3, 28-strand.x, 1, strand.x+1)
+    w_file_size.addstr("┬0bp\n"\
+                     + "│\n" * (curses.LINES-5)\
+                     + "┴" + '{:,}'.format(files.sequence_length) + "bp")
+    w_file_size.noutrefresh()
+
+
 
 
 def load_cmd(input = None, refresh_only = False):
