@@ -2,7 +2,6 @@ import curses
 import files
 
 #-----------------------------------------------------------------------
-
 class TextArt:
 
     buffer = 0
@@ -33,11 +32,15 @@ dna = TextArt("├┄┤\n")
 #-----------------------------------------------------------------------
 
 def load_dna():
-    w_dna = curses.newwin(curses.LINES, 10, 1, 40)
-    w_dna.addstr(dna.fill(curses.LINES-3))
+
+    WDNA_X = 10
+    WDNA_Y = curses.LINES
+    DNA_STRING_Y = curses.LINES - 3 # height of  w_strand string
+
+    w_dna = curses.newwin(WDNA_Y, WDNA_X, 1, 40)
+    w_dna.addstr(dna.fill(DNA_STRING_Y))
     w_dna.noutrefresh()
 
-    w_dna_ruler = curses.newwin(curses.LINES, 9, 1, 31)
 
     if dna.buffer >= 10_000_000:
         dna_min = str(round(dna.buffer / 10_000_000))\
@@ -47,7 +50,6 @@ def load_dna():
     else:
         dna_min = '{:,}'.format(round((dna.buffer / 1_000)))\
                   + "kpb"
-
     if (dna.buffer + dna.scale) >= 10_000_000:
         dna_max = str(round((dna.buffer + dna.scale) / 1_000_000))\
                   + "mpb"
@@ -57,24 +59,38 @@ def load_dna():
         dna_max = '{:,}'.format(round((dna.buffer + dna.scale) / 1_000))\
                   + "kpb"
 
+
+    # width 9 for max formatted text of: '99,999kbp'
+    DNA_RULER_X = 9
+
+    w_dna_ruler = curses.newwin(WDNA_Y, DNA_RULER_X, 1, 40 - DNA_RULER_X)
     w_dna_ruler.addstr('{:>8}'.format(dna_min) + "\n"\
-                      +"       │\n" * (curses.LINES-5)\
+                      +"       │\n" * (DNA_STRING_Y - 2)\
                       +'{:>8}'.format(dna_max))
     w_dna_ruler.noutrefresh()
 
 #-----------------------------------------------------------------------
 
 def load_strand(strand = _strand):
-    w_strand = curses.newwin(curses.LINES-1, 30, 0, 0)
-    w_strand.addstr(strand.fill(curses.LINES-2))
+
+    WSTRAND_X = 30
+    WSTRAND_Y = curses.LINES - 1 # so border isn't cut off by cmd line
+    STRAND_STRING_Y = WSTRAND_Y - 2 # for borders
+
+    w_strand = curses.newwin(WSTRAND_Y, WSTRAND_X, 0, 0)
+    w_strand.addstr(strand.fill(STRAND_STRING_Y))
     w_strand.border()
     w_strand.noutrefresh()
 
-    w_file_size = curses.newwin(curses.LINES-3, 28-strand.x, 1, strand.x+1)
-    w_file_size.addstr("┬0bp\n"\
-                     + "│\n" * (curses.LINES-5)\
+
+    WSTRAND_RULER_Y = WSTRAND_Y - 2 # for borders
+    WSTRAND_RULER_X = WSTRAND_X - (2 + strand.x) # borders + strand string
+
+    w_strand_ruler = curses.newwin(WSTRAND_RULER_Y, WSTRAND_RULER_X, 1, strand.x+1)
+    w_strand_ruler.addstr("┬0bp\n"\
+                     + "│\n" * (WSTRAND_RULER_Y - 2)\
                      + "┴" + '{:,}'.format(files.sequence_length) + "bp")
-    w_file_size.noutrefresh()
+    w_strand_ruler.noutrefresh()
 
 #-----------------------------------------------------------------------
 

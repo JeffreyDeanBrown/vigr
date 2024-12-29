@@ -4,12 +4,16 @@ import curses
 import windows, commands
 
 """
-TODO:   -make scaling relative to filesize
+TODO:   -make scaling relative to filesize & implement location highlights
         -implement gg + G + \d*gg searching
+        -implement subroutine for getting messages to user
         -add command history
         -add constants to represent window sizes and stuff
         -implement offset + scale commands based on \d*\Ddb | \d*db format
         -implement keystroke scrolling + page scrolling
+
+FIXME:  -invalid escape sequence SyntaxWarning when :q
+        -figure out curses.LINES - 1 reasoning and fix comments
 """
 
 # initialize curses
@@ -23,6 +27,7 @@ def main(stdscr):
     curses.echo()
     render_screen()
 
+    #main loop
     while True:
         # wait for user input
         curses.curs_set(0)
@@ -41,6 +46,8 @@ def main(stdscr):
             windows.load_cmd(":")
             curses.curs_set(1)
             curses.echo()
+
+            #usr input as string
             ex = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
 
             if ex == chr(curses.KEY_RESIZE):
@@ -57,8 +64,8 @@ def main(stdscr):
 
 def render_screen():
     stdscr.noutrefresh()
-    windows.load_strand()
     windows.load_dna()
+    windows.load_strand()
     windows.load_cmd(refresh_only = True)
 
 

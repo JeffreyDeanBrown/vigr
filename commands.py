@@ -1,4 +1,4 @@
-import windows
+import windows, files
 import re
 
 
@@ -7,7 +7,7 @@ def little_dna():
     windows.load_dna()
 
 def small_dna():
-    windows.dna.update_text(new_text = "││\n")
+    windows.dna.update_text(new_text = "┠┨\n")
     windows.load_dna()
 
 def medium_dna():
@@ -21,17 +21,27 @@ def big_dna():
 
 def set_dna(offset):
     windows.dna.buffer = offset
+    if windows.dna.buffer >= files.sequence_length:
+        windows.dna.buffer = files.sequence_length - windows.dna.scale
+    if (windows.dna.buffer + windows.dna.scale) > files.sequence_length:
+        windows.dna.scale = files.sequence_length - windows.dna.buffer
+        scale_dna(None)
     windows.load_dna()
 
 def scale_dna(range_):
-    for x in range_.split(sep = " "):
-        if x.isnumeric():
-            windows.dna.scale = int(x)
-    if windows.dna.scale > 1_000_000_000:
+    try:
+        for x in range_.split(sep = " "):
+            if x.isnumeric():
+                windows.dna.scale = int(x)
+    except:
+        pass
+    if (windows.dna.buffer + windows.dna.scale) > files.sequence_length:
+        windows.dna.buffer = files.sequence_length - windows.dna.scale
+    if windows.dna.scale > 1_000_000:
         little_dna()
-    elif windows.dna.scale > 1_000_000:
-        small_dna()
     elif windows.dna.scale > 1_000:
+        small_dna()
+    elif windows.dna.scale > 100:
         medium_dna()
     else:
         big_dna()
