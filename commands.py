@@ -27,15 +27,15 @@ def scale_dna(range_: int):
     if range_ == 0:
         textart.dna.offset = int(range_)
 
-    # if range_ < (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
-    #     textart.dna.offset = (curses.LINES - 3) - 1
+    if range_ < (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
+        textart.dna.offset = (curses.LINES - 3) - 1
 
     # FIXME:
     #       -make a "full sequence" subroutine and make this a call to that routine
 
     if textart.dna.offset >= files.sequence_length:
-        textart.dna.index = 0
-        textart.dna.offset = files.sequence_length
+        textart.dna.index = 1
+        textart.dna.offset = files.sequence_length - 1
     if (textart.dna.index + textart.dna.offset) > files.sequence_length:
         textart.dna.index = files.sequence_length - textart.dna.offset
 
