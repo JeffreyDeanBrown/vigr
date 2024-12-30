@@ -3,35 +3,47 @@
 import curses
 import windows, commands
 
-def debug(stdscr):
-    curses.nocbreak()
-    stdscr.keypad(0)
-    curses.echo()
-    curses.endwin()
-    import pdb; pdb.set_trace()
+#-----------------------------------------------------------------------
 
 """
 TODO:   -implement gg + G + \d*gg searching
-        -implement subroutine for getting messages to user
-        -add command history
-        -layout window positions in WINDOWS comments and convert to constants
-        -implement keystroke scrolling + page scrolling
+        -layout window positions in text file and convert to constants
+        -add 9-char value support to strand (same as dna)
+        -add temporary file-loading commands
         -add major and minor axis lines to strand ruler + labels
+        -add docstring to everything
+        -make nucleotide-scale the minimum offset (& max index = filesize - min.offset)
+        -implement subroutine for getting messages to user
+        -add command history + scrolling
+        -implement keystroke scrolling + page scrolling
+        -type annotate functions
+        -implement gff file + fasta file reading
+        -become a master at [] indexing
 
 FIXME:  -invalid escape sequence SyntaxWarning when :q
       WINDOWS:
         -figure out curses.LINES - 1 reasoning and fix comments
         -also, all the mess with offsets and -1 -2, etc
       COMMANDS:
-        -can currently set scale to 0 (implement minimum dna offset)
         -make comma and bp parsing DRY
 """
+
+#-----------------------------------------------------------------------
 
 # initialize curses
 stdscr = curses.initscr()
 curses.echo()
 curses.curs_set(0)
 
+
+def debug(stdscr):
+    curses.nocbreak()
+    stdscr.keypad(0)
+    curses.echo()
+    curses.endwin()
+    breakpoint()
+
+#-----------------------------------------------------------------------
 
 def main(stdscr):
     # initial setup

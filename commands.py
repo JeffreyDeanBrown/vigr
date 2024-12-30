@@ -28,21 +28,22 @@ def set_dna(index_):
         windows.dna.index = files.sequence_length - windows.dna.offset
     if (windows.dna.index + windows.dna.offset) > files.sequence_length:
         windows.dna.offset = files.sequence_length - windows.dna.index
-        scale_dna("")
+        scale_dna(0) # scale string art, but don't change offset
     windows.load_dna()
     windows.load_strand()
 
-def scale_dna(range_):
+def scale_dna(range_: int):
 
-    # optional use: scale_dna(0) or scale_dna("") will resize dna chars
-    # without changing the offset
+    #prevent setting a scale of 0
+    # optional use: scale_dna(0) will resize dna chars without changing the offset
+
     if range_:
         windows.dna.offset = int(range_)
 
     # FIXME:
     #       -make a "full sequence" subroutine and make this a call to that routine
 
-    if windows.dna.offset > files.sequence_length:
+    if windows.dna.offset >= files.sequence_length:
         windows.dna.index = 0
         windows.dna.offset = files.sequence_length
     if (windows.dna.index + windows.dna.offset) > files.sequence_length:
