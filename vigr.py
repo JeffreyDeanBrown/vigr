@@ -10,7 +10,6 @@ import windows, commands
 # FUNCTIONALITY:
 # -implement gff file + fasta file reading
 # -implement annotation window + gff annotations
-# -make nucleotide-scale the minimum offset (& max index = filesize - min.offset)
 
 # FEATURES:
 
@@ -22,6 +21,8 @@ import windows, commands
 # -implement keystroke scrolling + page scrolling
 # -annotate function types + argument types
 # -become a master at [] indexing
+# -implement "minimum mode" where scale stays at 1bp per line (even when resized)
+# -when the scale is small enough, somehow change ruler annotations to smaller scale
 
 # FIXME:
 # COMMANDS.PY:
@@ -59,8 +60,7 @@ def main(stdscr):
         key = stdscr.getch(curses.LINES-1,curses.COLS-5)
 
         if key == curses.KEY_RESIZE:
-            curses.update_lines_cols()
-            render_screen()
+            resize_vigr()
 
         elif key in commands.vigr_commands:
             pass
@@ -75,8 +75,7 @@ def main(stdscr):
             ex = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
 
             if ex == chr(curses.KEY_RESIZE):
-                curses.update_lines_cols()
-                render_screen()
+                resize_vigr()
 
             elif ex == 'q':
                 break # thank you have a good one
@@ -96,6 +95,11 @@ def render_screen():
     windows.load_dna()
     windows.load_cmd(refresh_only = True)
     curses.doupdate()
+
+def resize_vigr():
+    curses.update_lines_cols()
+    commands.scale_dna(0) # update dna scale
+    render_screen()
 
 
 curses.wrapper(main)

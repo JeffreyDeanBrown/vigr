@@ -25,10 +25,9 @@ def scale_dna(range_: int):
     #prevent setting a scale of 0
     # optional use: scale_dna(0) will resize dna chars without changing the offset
     if range_ == 0:
+        pass
+    else:
         textart.dna.offset = int(range_)
-
-    if range_ < (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
-        textart.dna.offset = (curses.LINES - 3) - 1
 
     # FIXME:
     #       -make a "full sequence" subroutine and make this a call to that routine
@@ -39,12 +38,12 @@ def scale_dna(range_: int):
     if (textart.dna.index + textart.dna.offset) > files.sequence_length:
         textart.dna.index = files.sequence_length - textart.dna.offset
 
-    if textart.dna.offset > 1_000:
-        small_dna()
-    elif textart.dna.offset > 100:
+    if textart.dna.offset < (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
+        textart.dna.offset = (curses.LINES - 3) - 1
         medium_dna()
     else:
-        big_dna()
+        small_dna()
+
 
 def small_dna():
     textart.dna.update_text(new_text = "┠┨\n")
