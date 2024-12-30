@@ -1,63 +1,66 @@
-import windows, files
-import re
+import files, textart
+import re, curses
 
 
-def small_dna():
-    windows.dna.update_text(new_text = "┠┨\n")
-    windows.load_dna()
-    windows.load_strand()
-
-def medium_dna():
-    windows.dna.update_text("├┄┤\n")
-    windows.load_dna()
-    windows.load_strand()
-
-def large_dna():
-    windows.dna.update_text("┣┅┅┅┫\n"\
-                            "┃   ┃\n")
-    windows.load_dna()
-    windows.load_strand()
 
 def set_dna(index_):
-    windows.dna.index = index_
-    if windows.dna.index >= files.sequence_length:
-        windows.dna.index = files.sequence_length - windows.dna.offset
-    if (windows.dna.index + windows.dna.offset) > files.sequence_length:
-        windows.dna.offset = files.sequence_length - windows.dna.index
+    if index_ == 0:
+        #ERROR: cannot set to zero (when usr error msgs implemented)
+        return
+    textart.dna.index = index_
+    if textart.dna.index >= files.sequence_length:
+        textart.dna.index = files.sequence_length - textart.dna.offset
+    if (textart.dna.index + textart.dna.offset) > files.sequence_length:
+        textart.dna.offset = files.sequence_length - textart.dna.index
         scale_dna(0) # scale string art, but don't change offset
-    windows.load_dna()
-    windows.load_strand()
+
+
+
+# dna string from windows is curses.LINES - 3
 
 def scale_dna(range_: int):
+    # WARNING: if you make a new dna text art, make sure windows.WDNA_W
+    # can accomodate the width of the text art!
 
     #prevent setting a scale of 0
     # optional use: scale_dna(0) will resize dna chars without changing the offset
+    if range_ == 0:
+        textart.dna.offset = int(range_)
 
-    if range_:
-        windows.dna.offset = int(range_)
+    # if range_ < (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
+    #     textart.dna.offset = (curses.LINES - 3) - 1
 
     # FIXME:
     #       -make a "full sequence" subroutine and make this a call to that routine
 
-    if windows.dna.offset >= files.sequence_length:
-        windows.dna.index = 0
-        windows.dna.offset = files.sequence_length
-    if (windows.dna.index + windows.dna.offset) > files.sequence_length:
-        windows.dna.index = files.sequence_length - windows.dna.offset
+    if textart.dna.offset >= files.sequence_length:
+        textart.dna.index = 0
+        textart.dna.offset = files.sequence_length
+    if (textart.dna.index + textart.dna.offset) > files.sequence_length:
+        textart.dna.index = files.sequence_length - textart.dna.offset
 
-    if windows.dna.offset > 1_000:
+    if textart.dna.offset > 1_000:
         small_dna()
-    elif windows.dna.offset > 100:
+    elif textart.dna.offset > 100:
         medium_dna()
     else:
-        large_dna()
+        big_dna()
+
+def small_dna():
+    textart.dna.update_text(new_text = "┠┨\n")
+
+def medium_dna():
+    textart.dna.update_text("├┄┤\n")
+
+def big_dna():
+    textart.dna.update_text("┣┅┅┅┫\n"\
+                            "┃   ┃\n")
 
 
 ex_commands = {}
 vigr_commands = {}
 
 def check_ex_commands(cmd): #cmd comes in as a character string
-
 
     if cmd in ex_commands:
         run_it = ex_commands[cmd]

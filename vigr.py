@@ -1,29 +1,32 @@
 #!/usr/bin/env python
 
-import curses
+import curses, sys
 import windows, commands
 
 #-----------------------------------------------------------------------
 
-"""
-TODO:   -implement gg + G + \d*gg searching
-        -layout window positions in text file and convert to constants
-        -add 9-char value support to strand (same as dna)
-        -add temporary file-loading commands
-        -add major and minor axis lines to strand ruler + labels
-        -add docstring to everything
-        -make nucleotide-scale the minimum offset (& max index = filesize - min.offset)
-        -implement subroutine for getting messages to user
-        -add command history + scrolling
-        -implement keystroke scrolling + page scrolling
-        -type annotate functions
-        -implement gff file + fasta file reading
-        -become a master at [] indexing
+# TODO:
 
-FIXME:  -invalid escape sequence SyntaxWarning when :q
-      COMMANDS:
-        -make comma and bp parsing DRY
-"""
+# FUNCTIONALITY:
+# -implement gff file + fasta file reading
+# -implement annotation window + gff annotations
+# -make nucleotide-scale the minimum offset (& max index = filesize - min.offset)
+
+# FEATURES:
+
+# -implement gg + G + \d*gg searching
+# -add major and minor axis lines to strand ruler + labels
+# -add docstring to everything
+# -implement subroutine for getting messages to user
+# -add command history + scrolling
+# -implement keystroke scrolling + page scrolling
+# -annotate function types + argument types
+# -become a master at [] indexing
+
+# FIXME:
+# COMMANDS.PY:
+# -make comma and bp parsing DRY
+# -cannot set_dna with comma delimited + kbp/mbp labeled (bp works though)
 
 #-----------------------------------------------------------------------
 
@@ -45,10 +48,11 @@ def debug(stdscr):
 def main(stdscr):
     # initial setup
     curses.echo()
-    render_screen()
 
     #main loop
     while True:
+        # apply last change
+        render_screen()
         # wait for user input
         curses.curs_set(0)
         # usr input as decimal value
@@ -81,12 +85,17 @@ def main(stdscr):
                 commands.check_ex_commands(ex)
 
 
-
+# load_cmd is always the bottom row, other windows load from
+# left to right in the order that they are loaded
 def render_screen():
+    if curses.LINES < 6:
+       sys.exit("VIGR ERROR: Window Too Short!\n"\
+             "   minimum window height is 6 lines.")
     stdscr.noutrefresh()
-    windows.load_dna()
     windows.load_strand()
+    windows.load_dna()
     windows.load_cmd(refresh_only = True)
+    curses.doupdate()
 
 
 curses.wrapper(main)
