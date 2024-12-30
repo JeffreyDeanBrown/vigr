@@ -21,9 +21,6 @@ TODO:   -implement gg + G + \d*gg searching
         -become a master at [] indexing
 
 FIXME:  -invalid escape sequence SyntaxWarning when :q
-      WINDOWS:
-        -figure out curses.LINES - 1 reasoning and fix comments
-        -also, all the mess with offsets and -1 -2, etc
       COMMANDS:
         -make comma and bp parsing DRY
 """

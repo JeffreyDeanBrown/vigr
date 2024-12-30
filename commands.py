@@ -1,10 +1,6 @@
 import windows, files
 import re
 
-def little_dna():
-    windows.dna.update_text(new_text = "║\n")
-    windows.load_dna()
-    windows.load_strand()
 
 def small_dna():
     windows.dna.update_text(new_text = "┠┨\n")
@@ -16,7 +12,7 @@ def medium_dna():
     windows.load_dna()
     windows.load_strand()
 
-def big_dna():
+def large_dna():
     windows.dna.update_text("┣┅┅┅┫\n"\
                             "┃   ┃\n")
     windows.load_dna()
@@ -49,14 +45,12 @@ def scale_dna(range_: int):
     if (windows.dna.index + windows.dna.offset) > files.sequence_length:
         windows.dna.index = files.sequence_length - windows.dna.offset
 
-    if windows.dna.offset > 1_000_000:
-        little_dna()
-    elif windows.dna.offset > 1_000:
+    if windows.dna.offset > 1_000:
         small_dna()
     elif windows.dna.offset > 100:
         medium_dna()
     else:
-        big_dna()
+        large_dna()
 
 
 ex_commands = {}
