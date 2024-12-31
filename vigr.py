@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 
 import curses, sys
-import windows, commands
+import windows, commands, files
 
 #-----------------------------------------------------------------------
 
 # TODO:
 
 #   FUNCTIONALITY:
-#   -implement gff file + fasta file reading
-#   -implement annotation window + gff annotations
+#   -implement annotation window with basic functionality
+#   -get together a basic mock-up of a gff (just start/stop positions)
+#   -implement full gff file + fasta file parsing (sequence selection, etc)
 #
 #   FEATURES:
 #   -implement gg + G + \d*gg searching
@@ -93,6 +94,7 @@ def render_screen():
     stdscr.noutrefresh()
     windows.load_strand()
     windows.load_dna()
+    windows.load_presentation()
     windows.load_cmd(refresh_only = True)
     curses.doupdate()
 

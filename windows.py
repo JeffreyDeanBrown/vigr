@@ -9,7 +9,7 @@ import textart
 # (diagram not to scale)
 # (w_strand has a border, which takes up 2 columns)
 #
-# <------------WSTRAND_W--------------><--WDNA_RULER_W--><--WDNA_W-->
+# <------------WSTRAND_W--------------><--WDNA_RULER_W--><--WDNA_W--><--PRESENTATION_W-->> (the rest)
 # │<--------(WSTRAND_W - 2)---------->│
 # │<--strand.w--><--WSTRAND_RULER_W-->│
 
@@ -18,13 +18,14 @@ import textart
 WSTRAND_RULER_W = 11
 WSTRAND_W = textart.strand.w + WSTRAND_RULER_W + 2 # 2 extra for the border
 WDNA_RULER_W = 9 # just 9 for value (max: xx,xxxkbp)
-WDNA_W = WDNA_RULER_W + 5 # current largest DNA text art is 5 wide
+WDNA_W =  6 # current largest DNA text art is 5 wide
 
 # window positions (furthest left column)
 WSTRAND_X = 0
 WSTRAND_RULER_X = textart.strand.w + 1
 WDNA_RULER_X = WSTRAND_W + 1
 WDNA_X = WDNA_RULER_X + WDNA_RULER_W
+WPRESENTATION_X = WDNA_X + WDNA_W
 
 #-----------------------------------------------------------------------
 
@@ -65,14 +66,6 @@ def load_strand():
 
 
     strand_ruler_max = basepair_format(files.sequence_length)
-    # if files.sequence_length >= 10_000_000:
-    #     strand_ruler_max = str(round(files.sequence_length / 1_000_000))\
-    #               + "mpb"
-    # elif files.sequence_length < 10_000:
-    #     strand_ruler_max = '{:,}'.format(files.sequence_length) + "bp"
-    # else:
-    #     strand_ruler_max = '{:,}'.format(round(files.sequence_length / 1_000))\
-    #               + "kpb"
 
     # start at y = 1, x = strand.w + 1 to avoid borders
     w_strand_ruler = curses.newwin(WSTRAND_ID_H, WSTRAND_RULER_W, 1, WSTRAND_RULER_X)
@@ -116,6 +109,23 @@ def load_strand():
 
     w_strand.noutrefresh()
     w_strand_ruler.noutrefresh()
+
+
+#-----------------------------------------------------------------------
+
+def load_presentation():
+    WPRESENTATION_H = curses.LINES - 1 #room for w_cmd
+    WPRESENTATION_W = curses.COLS - WPRESENTATION_X
+
+    #FIXME
+    files.gff_parser(start = textart.dna.index, end = textart.dna.index + textart.dna.offset)
+
+    string_ = str(files.features)
+
+    w_presentation = curses.newwin(WPRESENTATION_H, WPRESENTATION_W, 0, WPRESENTATION_X)
+    w_presentation.addstr(string_)
+    w_presentation.noutrefresh()
+
 
 #-----------------------------------------------------------------------
 

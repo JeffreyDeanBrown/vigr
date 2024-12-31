@@ -56,7 +56,7 @@ def big_dna():
                             "┃   ┃\n")
 
 
-ex_commands = {}
+ex_commands = {'big':big_dna}
 vigr_commands = {}
 
 def check_ex_commands(cmd): #cmd comes in as a character string
