@@ -27,11 +27,14 @@ WDNA_RULER_X = WSTRAND_W + 1
 WDNA_X = WDNA_RULER_X + WDNA_RULER_W
 WPRESENTATION_X = WDNA_X + WDNA_W
 
+FEATURE_SPACING = 10
+
 #-----------------------------------------------------------------------
 
 def load_dna():
 
     WDNA_H = curses.LINES - 1 # 1 to line up w/border
+    global DNA_STRING_H
     DNA_STRING_H = WDNA_H - 2 # line up w/top + bottom borders
     dna_ruler_min = basepair_format(textart.dna.index)
     dna_ruler_max = basepair_format(textart.dna.index+textart.dna.offset)
@@ -74,38 +77,21 @@ def load_strand():
                      + "┴" + strand_ruler_max)
 
 
+    _scaled = scale_to_vigr(index = textart.dna.index, offset = textart.dna.offset,\
+                                         char_scale = WSTRAND_ID_H, int_scale = files.sequence_length)
 
-    # >>> HIGHLIGHT CURRENT SELECTION >>>
+    textart.strand.index = _scaled['scaled_index']
+    textart.strand.offset = _scaled['scaled_offset']
 
 
-    #strand.index starts at 0, ends at WSTRAND_ID_H
-    textart.strand.index = math.floor((textart.dna.index/files.sequence_length) * WSTRAND_ID_H)
+    #NOTE TO SELF: list(range(n+1)) returns [0:n]
 
-    #strand.offset starts at 0, ends at WSTRAND_ID_H - 1
-    #figure out where to stop, and subtract index from that
-    dna_endpoint = textart.dna.index + textart.dna.offset
-    textart.strand.offset = math.floor((dna_endpoint / files.sequence_length) * WSTRAND_ID_H)\
-                    - textart.strand.index
-    # the scale_dna and set_dna functions protect dna index/offset from going
-    # above the file size, but nothing stops it from setting it to exactly the
-    # file size-- which would set strand.offset = WSTRAND_ID_H and cause
-    # curses to error due to drawing outside of w_strand_ruler window
-    if textart.strand.index + textart.strand.offset == WSTRAND_ID_H:
-        textart.strand.offset -= 1
-
-    #w_strand starts outside border, so start at y = 1, x = 1
-    w_strand.chgat(1 + textart.strand.index, 1, (WSTRAND_W - 2), curses.A_BLINK)
-    for lines in range(1, textart.strand.offset + 1):
-        w_strand.chgat(1 + textart.strand.index + lines, 1, (WSTRAND_W - 2), curses.A_BLINK)
-
+    # w_strand starts outside border, so start at y = 1, x = 1
+    _offset_list = list(range(textart.strand.offset + 1))
+    for _offset in  _offset_list:
+        w_strand.chgat(1 + textart.strand.index + _offset, 1, (WSTRAND_W - 2), curses.A_BLINK)
     #w_strand_ruler starts inside border, so start at y = 0, x = 0
-    w_strand_ruler.chgat(textart.strand.index, 0, WSTRAND_RULER_W, curses.A_REVERSE)
-    for lines in range(1, textart.strand.offset + 1):
-        w_strand_ruler.chgat(textart.strand.index + lines, 0, WSTRAND_RULER_W, curses.A_REVERSE)
-
-
-    # <<< HIGHLIGHT CURRENT SELECTION <<<
-
+        w_strand_ruler.chgat(textart.strand.index + _offset, 0, WSTRAND_RULER_W, curses.A_REVERSE)
 
     w_strand.noutrefresh()
     w_strand_ruler.noutrefresh()
@@ -114,16 +100,47 @@ def load_strand():
 #-----------------------------------------------------------------------
 
 def load_presentation():
-    WPRESENTATION_H = curses.LINES - 1 #room for w_cmd
+    WPRESENTATION_H = curses.LINES - 1
+    PRES_STRING_H = DNA_STRING_H
     WPRESENTATION_W = curses.COLS - WPRESENTATION_X
 
     #FIXME
     files.gff_parser(start = textart.dna.index, end = textart.dna.index + textart.dna.offset)
 
-    string_ = str(files.features)
-
     w_presentation = curses.newwin(WPRESENTATION_H, WPRESENTATION_W, 0, WPRESENTATION_X)
-    w_presentation.addstr(string_)
+
+    _occupied_tiles = [] # y,x
+
+    for feature in files.features:
+        if feature['start'] < textart.dna.index:
+            feature['start'] = textart.dna.index
+
+        if feature['end'] > (textart.dna.index + textart.dna.offset):
+            feature['end'] = (textart.dna.index + textart.dna.offset)
+
+        _scaled = scale_to_vigr(index = feature['start'] - textart.dna.index,\
+                                             offset = feature['end'] - feature['start'],\
+                                             char_scale = PRES_STRING_H,\
+                                             int_scale = textart.dna.offset + 1)
+
+        _index = _scaled['scaled_index']
+        _col = 0
+        _offset_list = list(range(_scaled['scaled_offset'] + 1))
+
+        for _offset in _offset_list:
+            while ((_index + _offset), _col) in _occupied_tiles:
+                _col += FEATURE_SPACING
+
+        for _offset in _offset_list:
+            _occupied_tiles.append(((_index+_offset), _col))
+
+        for _offset in  _offset_list:
+            w_presentation.addstr(1 + _index + _offset, _col, '┃')
+
+
+    # string_ = str(files.features)
+    # w_presentation.addstr(string_)
+
     w_presentation.noutrefresh()
 
 
@@ -150,3 +167,22 @@ def basepair_format(unformatted :int) -> str:
         return(str(round(unformatted / 1_000_000))\
                   + "mpb")
 
+
+def scale_to_vigr(index, offset, char_scale, int_scale) -> dict:
+    '''
+    returns dict {scaled_index:, scaled_offset} scaled down to chars in char_scale.
+    '''
+    if index < 0:
+        index = 0
+    _endpoint = index + offset
+    scaled_index = math.floor((index / int_scale) * char_scale)
+
+    scaled_offset = math.floor((_endpoint / int_scale) * char_scale)\
+                    - scaled_index
+
+    # make sure when at the end of char_scale, you don't add a new char
+    # otherwise you will go over your chars limit
+    if scaled_index + scaled_offset == char_scale:
+        scaled_offset -= 1
+
+    return({'scaled_index':scaled_index, 'scaled_offset':scaled_offset})
