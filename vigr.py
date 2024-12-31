@@ -7,27 +7,27 @@ import windows, commands
 
 # TODO:
 
-# FUNCTIONALITY:
-# -implement gff file + fasta file reading
-# -implement annotation window + gff annotations
-
-# FEATURES:
-
-# -implement gg + G + \d*gg searching
-# -add major and minor axis lines to strand ruler + labels
-# -add docstring to everything
-# -implement subroutine for getting messages to user
-# -add command history + scrolling
-# -implement keystroke scrolling + page scrolling
-# -annotate function types + argument types
-# -become a master at [] indexing
-# -implement "minimum mode" where scale stays at 1bp per line (even when resized)
-# -when the scale is small enough, somehow change ruler annotations to smaller scale
+#   FUNCTIONALITY:
+#   -implement gff file + fasta file reading
+#   -implement annotation window + gff annotations
+#
+#   FEATURES:
+#   -implement gg + G + \d*gg searching
+#   -add major and minor axis lines to strand ruler + labels
+#   -add docstring to everything
+#   -implement subroutine for getting messages to user
+#   -add command history + scrolling
+#   -implement keystroke scrolling + page scrolling
+#   -annotate function types + argument types
+#   -become a master at [] indexing
+#   -implement "minimum mode" where scale stays at 1bp per line (even when resized)
+#   -when the scale is small enough, somehow change ruler annotations to smaller scale
 
 # FIXME:
-# COMMANDS.PY:
-# -make comma and bp parsing DRY
-# -cannot set_dna with comma delimited + kbp/mbp labeled (bp works though)
+
+#   COMMANDS.PY:
+#   -make comma and bp parsing DRY
+#   -cannot set_dna with comma delimited + kbp/mbp labeled (bp works though)
 
 #-----------------------------------------------------------------------
 
@@ -78,7 +78,7 @@ def main(stdscr):
                 resize_vigr()
 
             elif ex == 'q':
-                break # thank you have a good one
+                break # thank you have nice day
 
             else:
                 commands.check_ex_commands(ex)
