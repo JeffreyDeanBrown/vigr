@@ -68,7 +68,7 @@ def load_strand():
 
 
 
-    strand_ruler_max = basepair_format(files.sequence_length)
+    strand_ruler_max = basepair_format(files.file.sequence_length)
 
     # start at y = 1, x = strand.w + 1 to avoid borders
     w_strand_ruler = curses.newwin(WSTRAND_ID_H, WSTRAND_RULER_W, 1, WSTRAND_RULER_X)
@@ -78,7 +78,7 @@ def load_strand():
 
 
     _scaled = scale_to_vigr(index = textart.dna.index, offset = textart.dna.offset,\
-                                         char_scale = WSTRAND_ID_H, int_scale = files.sequence_length)
+                                         char_scale = WSTRAND_ID_H, int_scale = files.file.sequence_length)
 
     textart.strand.index = _scaled['scaled_index']
     textart.strand.offset = _scaled['scaled_offset']
@@ -105,37 +105,76 @@ def load_presentation():
     WPRESENTATION_W = curses.COLS - WPRESENTATION_X
 
     #FIXME
-    files.gff_parser(start = textart.dna.index, end = textart.dna.index + textart.dna.offset)
+    files.file.gff_parser(start = textart.dna.index, end = textart.dna.index + textart.dna.offset)
 
     w_presentation = curses.newwin(WPRESENTATION_H, WPRESENTATION_W, 0, WPRESENTATION_X)
 
     _occupied_tiles = [] # y,x
 
-    for feature in files.features:
+    for feature in files.file.features:
+
+        _lower_cutoff = False
+        _upper_cutoff = False
+
         if feature['start'] < textart.dna.index:
-            feature['start'] = textart.dna.index
+            _start = textart.dna.index
+            _lower_cutoff = True
+        else:
+            _start = feature['start']
 
         if feature['end'] > (textart.dna.index + textart.dna.offset):
-            feature['end'] = (textart.dna.index + textart.dna.offset)
+            _end = (textart.dna.index + textart.dna.offset)
+            _upper_cutoff = True
+        else:
+            _end = feature['end']
 
-        _scaled = scale_to_vigr(index = feature['start'] - textart.dna.index,\
-                                             offset = feature['end'] - feature['start'],\
+        _scaled = scale_to_vigr(index = _start - textart.dna.index,\
+                                             offset = _end - _start,\
                                              char_scale = PRES_STRING_H,\
                                              int_scale = textart.dna.offset + 1)
 
         _index = _scaled['scaled_index']
-        _col = 0
+
+        if feature['col']:
+            _col = feature['col']
+        else:
+            _col = 0
+
         _offset_list = list(range(_scaled['scaled_offset'] + 1))
 
         for _offset in _offset_list:
             while ((_index + _offset), _col) in _occupied_tiles:
                 _col += FEATURE_SPACING
 
+        feature['col'] = _col
+
         for _offset in _offset_list:
             _occupied_tiles.append(((_index+_offset), _col))
 
-        for _offset in  _offset_list:
-            w_presentation.addstr(1 + _index + _offset, _col, '┃')
+
+
+        if len(_offset_list) == 1:
+            if _lower_cutoff:
+                 w_presentation.addstr(1 + _index, _col, '┴')
+            elif _upper_cutoff:
+                 w_presentation.addstr(1 + _index, _col, '┬')
+            else:
+                 w_presentation.addstr(1 + _index, _col, '⌶', curses.A_BOLD)
+        else:
+
+            if _lower_cutoff:
+                w_presentation.addstr(1 + _index, _col, '│')
+            else:
+                w_presentation.addstr(1 + _index, _col, '┬')
+            if _upper_cutoff:
+                w_presentation.addstr(1 + _index + _offset_list[-1], _col, '│')
+            else:
+                w_presentation.addstr(1 + _index + _offset_list[-1], _col, '┴')
+
+            _offset_list = _offset_list[1:-1]
+
+            for _offset in _offset_list:
+                w_presentation.addstr(1 + _index + _offset, _col, '│')
 
 
     # string_ = str(files.features)

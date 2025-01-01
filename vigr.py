@@ -8,9 +8,11 @@ import windows, commands, files
 # TODO:
 
 #   FUNCTIONALITY:
-#   -implement annotation window with basic functionality
-#   -get together a basic mock-up of a gff (just start/stop positions)
-#   -implement full gff file + fasta file parsing (sequence selection, etc)
+#   -implement fasta file parsing
+#   -detect the edge of the presentation window, make sure not to paint there
+#   -implement gff browsing and labeling with an "if no to the right, autolabel"
+#   -label start and end of gff renders
+
 #
 #   FEATURES:
 #   -implement gg + G + \d*gg searching
@@ -23,6 +25,7 @@ import windows, commands, files
 #   -become a master at [] indexing
 #   -implement "minimum mode" where scale stays at 1bp per line (even when resized)
 #   -when the scale is small enough, somehow change ruler annotations to smaller scale
+#   -scrolling down all the way to infinity (sort of, it just loops for a screen)
 
 # FIXME:
 
@@ -53,18 +56,19 @@ def main(stdscr):
 
     #main loop
     while True:
+        curses.echo()
         # apply last change
         render_screen()
         # wait for user input
         curses.curs_set(0)
         # usr input as decimal value
-        key = stdscr.getch(curses.LINES-1,curses.COLS-5)
+        key = stdscr.getch(curses.LINES-1, curses.COLS-5)
 
         if key == curses.KEY_RESIZE:
             resize_vigr()
 
         elif key in commands.vigr_commands:
-            pass
+            commands.check_vigr_commands(key)
 
         elif key == ord(":"):
             # setup for : command
@@ -74,7 +78,6 @@ def main(stdscr):
 
             #usr input as string
             ex = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
-
             if ex == chr(curses.KEY_RESIZE):
                 resize_vigr()
 

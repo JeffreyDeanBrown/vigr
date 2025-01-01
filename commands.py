@@ -7,11 +7,13 @@ def set_dna(index_):
     if index_ == 0:
         #ERROR: cannot set to zero (when usr error msgs implemented)
         return
+    if index_ < 0:
+        index_ = 1
     textart.dna.index = index_
-    if textart.dna.index >= files.sequence_length:
-        textart.dna.index = files.sequence_length - textart.dna.offset
-    if (textart.dna.index + textart.dna.offset) > files.sequence_length:
-        textart.dna.offset = files.sequence_length - textart.dna.index
+    if textart.dna.index >= files.file.sequence_length:
+        textart.dna.index = files.file.sequence_length - textart.dna.offset
+    if (textart.dna.index + textart.dna.offset) > files.file.sequence_length:
+        textart.dna.offset = files.file.sequence_length - textart.dna.index
         scale_dna(0) # scale string art, but don't change offset
 
 
@@ -32,11 +34,12 @@ def scale_dna(range_: int):
     # FIXME:
     #       -make a "full sequence" subroutine and make this a call to that routine
 
-    if textart.dna.offset >= files.sequence_length:
+    if textart.dna.offset >= files.file.sequence_length:
         textart.dna.index = 1
-        textart.dna.offset = files.sequence_length - 1
-    if (textart.dna.index + textart.dna.offset) > files.sequence_length:
-        textart.dna.index = files.sequence_length - textart.dna.offset
+        textart.dna.offset = files.file.sequence_length - 1
+    if (textart.dna.index + textart.dna.offset) > files.file.sequence_length:
+        textart.dna.index = files.file.sequence_length - textart.dna.offset
+
 
     if textart.dna.offset < (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
         textart.dna.offset = (curses.LINES - 3) - 1
@@ -55,9 +58,21 @@ def big_dna():
     textart.dna.update_text("┣┅┅┅┫\n"\
                             "┃   ┃\n")
 
+def down():
+    _increment = round(textart.dna.offset / 30)
+    _move_to = textart.dna.index + _increment
+    set_dna(_move_to)
+
+def up():
+    _increment = textart.dna.offset // 30
+    _move_to = textart.dna.index - _increment
+    set_dna(_move_to)
 
 ex_commands = {'big':big_dna}
-vigr_commands = {}
+vigr_commands = {ord('j'):down,
+                 ord('k'):up,
+                 curses.KEY_DOWN:down,
+                 curses.KEY_UP:up}
 
 def check_ex_commands(cmd): #cmd comes in as a character string
 
@@ -99,3 +114,8 @@ def check_ex_commands(cmd): #cmd comes in as a character string
                 scale_dna(value)
 
 
+def check_vigr_commands(cmd): #cmd comes in as a character string
+
+    if cmd in vigr_commands:
+        run_it = vigr_commands[cmd]
+        run_it()
