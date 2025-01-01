@@ -3,7 +3,7 @@
 class TextArt:
 
     index = 1
-    offset = 999
+    offset = 9999
 
     def __init__(self, text, file_name = False):
         if file_name:

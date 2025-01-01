@@ -1,38 +1,42 @@
 #!/usr/bin/env python
 
 import curses, sys
-import windows, commands, files
+import windows, commands
 
 #-----------------------------------------------------------------------
 
 # TODO:
 
 #   FUNCTIONALITY:
-#   -implement fasta file parsing
-#   -detect the edge of the presentation window, make sure not to paint there
-#   -implement gff browsing and labeling with an "if no to the right, autolabel"
+#   -implement fasta file parsing & display nucleotides
+#   -implement "minimum mode" where scale stays at 1bp per line (even when resized)
+#   -label when scale <= 10,000. start at top, keep trying through whole gene
 #   -add arrow heads to indicate sense
-
+#   -gg + G + ##gg + esc key (basically, dynamic chr updates)
+#   -tab autocomplete and command history (build off dynamic chr updates)
+#   -gff file as argument, fasta file as argument, selecting sequence
+#   - :help function
+#   -that's it!
 #
 #   FEATURES:
-#   -implement gg + G + \d*gg searching
 #   -add major and minor axis lines to strand ruler + labels
 #   -add docstring to everything
 #   -implement subroutine for getting messages to user
-#   -add command history + scrolling
-#   -implement keystroke scrolling + page scrolling
 #   -annotate function types + argument types
-#   -become a master at [] indexing
-#   -implement "minimum mode" where scale stays at 1bp per line (even when resized)
-#   -when the scale is small enough, somehow change ruler annotations to smaller scale
-#   -scrolling down all the way to infinity (sort of, it just loops for a screen)
-#   -some features are resetting their cols after already being rendered
+#
+#   MAYBE:
+#   -change scrolling behavior. Set relative page size, only move when index is in new page?
 
 # FIXME:
 
 #   COMMANDS.PY:
 #   -make comma and bp parsing DRY
 #   -cannot set_dna with comma delimited + kbp/mbp labeled (bp works though)
+#   -sometimes ignores when a window is resized
+#   -some features are resetting their cols after already being rendered
+#   -move feature drawing to a state function
+#   -not all features are populating at large scales now? or something?
+
 
 #-----------------------------------------------------------------------
 

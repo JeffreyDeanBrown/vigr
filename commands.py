@@ -40,6 +40,7 @@ def scale_dna(range_: int):
     if (textart.dna.index + textart.dna.offset) > files.file.sequence_length:
         textart.dna.index = files.file.sequence_length - textart.dna.offset
 
+    files.file.reset_cols()
 
     if textart.dna.offset < (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
         textart.dna.offset = (curses.LINES - 3) - 1

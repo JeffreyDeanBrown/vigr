@@ -111,6 +111,7 @@ def load_presentation():
 
     _occupied_tiles = [] # y,x
 
+    #>>> Render feature >>>
     for feature in files.file.features:
 
         _lower_cutoff = False
@@ -133,10 +134,8 @@ def load_presentation():
                                              char_scale = PRES_STRING_H,\
                                              int_scale = textart.dna.offset + 1)
 
-        _index = _scaled['scaled_index']
+        _index = _scaled['scaled_index'] + 1 #line up with border
         _offset_list = list(range(_scaled['scaled_offset'] + 1))
-
-
 
         if feature['col']:
             _col = feature['col']
@@ -147,37 +146,60 @@ def load_presentation():
                     _col += FEATURE_SPACING
             feature['col'] = _col
 
-
         for _offset in _offset_list:
             _occupied_tiles.append(((_index+_offset), _col))
 
-
-        if len(_offset_list) == 1:
-            if _lower_cutoff:
-                 w_presentation.addstr(1 + _index, _col, '┴')
-            elif _upper_cutoff:
-                 w_presentation.addstr(1 + _index, _col, '┬')
-            else:
-                 w_presentation.addstr(1 + _index, _col, '⌶', curses.A_BOLD)
+        if (_col + WPRESENTATION_X) >= curses.COLS - 2:
+            # ERROR: too many cols!
+            for row in range(WPRESENTATION_H):
+                w_presentation.addstr(row, WPRESENTATION_W-3,'!!', curses.A_ITALIC)
         else:
 
-            if _lower_cutoff:
-                w_presentation.addstr(1 + _index, _col, '│')
+
+            if len(_offset_list) == 1:
+                feature['tiles'] = (_index, _index)
+                if _lower_cutoff:
+                     w_presentation.addstr(_index, _col, '┴')
+                elif _upper_cutoff:
+                     w_presentation.addstr(_index, _col, '┬')
+                else:
+                     w_presentation.addstr(_index, _col, '⌶', curses.A_BOLD)
             else:
-                w_presentation.addstr(1 + _index, _col, '┬')
-            if _upper_cutoff:
-                w_presentation.addstr(1 + _index + _offset_list[-1], _col, '│')
-            else:
-                w_presentation.addstr(1 + _index + _offset_list[-1], _col, '┴')
+                feature['tiles'] = (_index, _index + _offset_list[-1])
+                if _lower_cutoff:
+                    w_presentation.addstr(_index, _col, '│')
+                else:
+                    w_presentation.addstr(_index, _col, '┬')
+                if _upper_cutoff:
+                    w_presentation.addstr(_index + _offset_list[-1], _col, '│')
+                else:
+                    w_presentation.addstr(_index + _offset_list[-1], _col, '┴')
 
-            _offset_list = _offset_list[1:-1]
+                _offset_list = _offset_list[1:-1]
 
-            for _offset in _offset_list:
-                w_presentation.addstr(1 + _index + _offset, _col, '│')
+                for _offset in _offset_list:
+                    w_presentation.addstr(_index + _offset, _col, '│')
 
+    #<<< render feature <<<
 
-    # string_ = str(files.features)
-    # w_presentation.addstr(string_)
+    #>>> label feature >>>
+    for feature in files.file.features:
+        if feature['tiles'] != None: # if this feature exists
+            start, end = feature['tiles']
+            name = feature['id']
+            can_print = False
+
+            for row in range(start, end+1):
+                for char in range(1, len(name)+1):
+                    if ((row, feature['col']+char) in _occupied_tiles) or ((feature['col'] + char) >= WPRESENTATION_W):
+                        can_print = False
+                        break
+                    else:
+                        can_print = True
+                if can_print:
+                    w_presentation.addstr(row, feature['col'] + 1, name)
+                    break
+    #<<< label feature <<<
 
     w_presentation.noutrefresh()
 

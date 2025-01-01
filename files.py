@@ -31,7 +31,7 @@ class feature_presentation:
         for offset in range(len(features_orig)):
             feature = features_orig[offset]
             buffer.append({'id':feature.id, 'start':feature.start,\
-                           'end':feature.end, 'col':None})
+                           'end':feature.end, 'col':None, 'tiles':None})
 
         for buffered_feature in buffer:
             if any(buffered_feature['id'] == l['id'] for l in self.features):
@@ -44,6 +44,10 @@ class feature_presentation:
                 pass
             else:
                 self.features.remove(feature)
+
+    def reset_cols(self):
+        for feature in self.features:
+            feature['col'] = None
 
 
 
