@@ -11,7 +11,7 @@ import windows, commands, files
 #   -implement fasta file parsing
 #   -detect the edge of the presentation window, make sure not to paint there
 #   -implement gff browsing and labeling with an "if no to the right, autolabel"
-#   -label start and end of gff renders
+#   -add arrow heads to indicate sense
 
 #
 #   FEATURES:
@@ -26,6 +26,7 @@ import windows, commands, files
 #   -implement "minimum mode" where scale stays at 1bp per line (even when resized)
 #   -when the scale is small enough, somehow change ruler annotations to smaller scale
 #   -scrolling down all the way to infinity (sort of, it just loops for a screen)
+#   -some features are resetting their cols after already being rendered
 
 # FIXME:
 

@@ -1,4 +1,4 @@
-import files, textart
+import files, textart, windows
 import re, curses
 
 
@@ -59,12 +59,15 @@ def big_dna():
                             "┃   ┃\n")
 
 def down():
-    _increment = round(textart.dna.offset / 30)
+    _increment = round((textart.dna.offset + 1)/windows.DNA_STRING_H)
     _move_to = textart.dna.index + _increment
-    set_dna(_move_to)
+    if textart.dna.index + textart.dna.offset + _increment > files.file.sequence_length:
+        return
+    else:
+        set_dna(_move_to)
 
 def up():
-    _increment = textart.dna.offset // 30
+    _increment = round((textart.dna.offset + 1)/windows.DNA_STRING_H)
     _move_to = textart.dna.index - _increment
     set_dna(_move_to)
 

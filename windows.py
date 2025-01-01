@@ -134,23 +134,22 @@ def load_presentation():
                                              int_scale = textart.dna.offset + 1)
 
         _index = _scaled['scaled_index']
+        _offset_list = list(range(_scaled['scaled_offset'] + 1))
+
+
 
         if feature['col']:
             _col = feature['col']
         else:
             _col = 0
+            for _offset in _offset_list:
+                while ((_index + _offset), _col) in _occupied_tiles:
+                    _col += FEATURE_SPACING
+            feature['col'] = _col
 
-        _offset_list = list(range(_scaled['scaled_offset'] + 1))
-
-        for _offset in _offset_list:
-            while ((_index + _offset), _col) in _occupied_tiles:
-                _col += FEATURE_SPACING
-
-        feature['col'] = _col
 
         for _offset in _offset_list:
             _occupied_tiles.append(((_index+_offset), _col))
-
 
 
         if len(_offset_list) == 1:
