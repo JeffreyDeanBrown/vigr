@@ -30,8 +30,12 @@ class feature_presentation:
 
         for offset in range(len(features_orig)):
             feature = features_orig[offset]
+
             buffer.append({'id':feature.id, 'start':feature.start,\
-                           'end':feature.end, 'col':None, 'tiles':None})
+                           'end':feature.end, 'col':None, 'tiles':None,\
+                           'featuretype':feature.featuretype,\
+                           'name':feature.attributes.get('Name'),\
+                           'product':feature.attributes.get('product')[0]})
 
         for buffered_feature in buffer:
             if any(buffered_feature['id'] == l['id'] for l in self.features):

@@ -186,18 +186,24 @@ def load_presentation():
     for feature in files.file.features:
         if feature['tiles'] != None: # if this feature exists
             start, end = feature['tiles']
-            name = feature['id']
+            if feature['name']:
+                name = feature['name'][0]
+            else:
+                name = ''
+            product = feature['product']
+            label = feature['featuretype'] + ': ' + name + " ("\
+                    + product + ")"
             can_print = False
 
             for row in range(start, end+1):
-                for char in range(1, len(name)+1):
+                for char in range(1, len(label)+1):
                     if ((row, feature['col']+char) in _occupied_tiles) or ((feature['col'] + char) >= WPRESENTATION_W):
                         can_print = False
                         break
                     else:
                         can_print = True
                 if can_print:
-                    w_presentation.addstr(row, feature['col'] + 1, name)
+                    w_presentation.addstr(row, feature['col'] + 1, label)
                     break
     #<<< label feature <<<
 

@@ -10,7 +10,6 @@ import windows, commands
 #   FUNCTIONALITY:
 #   -implement fasta file parsing & display nucleotides
 #   -implement "minimum mode" where scale stays at 1bp per line (even when resized)
-#   -label when scale <= 10,000. start at top, keep trying through whole gene
 #   -add arrow heads to indicate sense
 #   -gg + G + ##gg + esc key (basically, dynamic chr updates)
 #   -tab autocomplete and command history (build off dynamic chr updates)
