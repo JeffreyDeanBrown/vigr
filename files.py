@@ -35,7 +35,8 @@ class feature_presentation:
                            'end':feature.end, 'col':None, 'tiles':None,\
                            'featuretype':feature.featuretype,\
                            'name':feature.attributes.get('Name'),\
-                           'product':feature.attributes.get('product')[0]})
+                           'product':feature.attributes.get('product')[0],\
+                           'strand':feature.strand})
 
         for buffered_feature in buffer:
             if any(buffered_feature['id'] == l['id'] for l in self.features):

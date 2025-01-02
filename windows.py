@@ -156,24 +156,40 @@ def load_presentation():
         else:
 
 
+                                     # ↧  ↥    ▲  𓏚   ⭡ ↓ ↑  Ʌ⯆    ▼↓ ⇂⭣▲
             if len(_offset_list) == 1:
                 feature['tiles'] = (_index, _index)
                 if _lower_cutoff:
-                     w_presentation.addstr(_index, _col, '┴')
+                    if feature['strand'] == '+':
+                         w_presentation.addstr(_index, _col, 'V')
+                    else:
+                         w_presentation.addstr(_index, _col, '╵')
                 elif _upper_cutoff:
-                     w_presentation.addstr(_index, _col, '┬')
+                    if feature['strand'] == '+':
+                         w_presentation.addstr(_index, _col, '╷')
+                    else:
+                         w_presentation.addstr(_index, _col, 'Ʌ')
                 else:
-                     w_presentation.addstr(_index, _col, '⌶', curses.A_BOLD)
+                    if feature['strand'] == '+':
+                         w_presentation.addstr(_index, _col, '⭣', curses.A_BOLD)
+                    else:
+                         w_presentation.addstr(_index, _col, '⭡', curses.A_BOLD)
             else:
                 feature['tiles'] = (_index, _index + _offset_list[-1])
                 if _lower_cutoff:
                     w_presentation.addstr(_index, _col, '│')
                 else:
-                    w_presentation.addstr(_index, _col, '┬')
+                    if feature['strand'] == '+':
+                         w_presentation.addstr(_index, _col, '╷')
+                    else:
+                         w_presentation.addstr(_index, _col, 'Ʌ')
                 if _upper_cutoff:
                     w_presentation.addstr(_index + _offset_list[-1], _col, '│')
                 else:
-                    w_presentation.addstr(_index + _offset_list[-1], _col, '┴')
+                    if feature['strand'] == '+':
+                        w_presentation.addstr(_index + _offset_list[-1], _col, 'V')
+                    else:
+                        w_presentation.addstr(_index + _offset_list[-1], _col, '╵')
 
                 _offset_list = _offset_list[1:-1]
 
@@ -191,7 +207,7 @@ def load_presentation():
             else:
                 name = ''
             product = feature['product']
-            label = feature['featuretype'] + ': ' + name + " ("\
+            label = ' ' + feature['featuretype'] + ': ' + name + " ("\
                     + product + ")"
             can_print = False
 
