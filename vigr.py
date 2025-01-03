@@ -2,6 +2,7 @@
 
 import curses, sys
 import windows, commands
+from curses_utils import vigrscr
 
 #-----------------------------------------------------------------------
 
@@ -9,12 +10,11 @@ import windows, commands
 
 #   FUNCTIONALITY:
 #   -implement fasta file parsing & display nucleotides
-#   -implement "minimum mode" where scale stays at 1bp per line (even when resized)
-#   -add arrow heads to indicate sense
-#   -gg + G + ##gg + esc key (basically, dynamic chr updates)
-#   -tab autocomplete and command history (build off dynamic chr updates)
 #   -gff file as argument, fasta file as argument, selecting sequence
+#   -swap gff and sequence from ex command
+#   -search using / + regex
 #   - :help function
+#   - get it to work with eukaryotic seuqences
 #   -that's it!
 #
 #   FEATURES:
@@ -23,8 +23,8 @@ import windows, commands
 #   -implement subroutine for getting messages to user
 #   -annotate function types + argument types
 #
-#   MAYBE:
-#   -change scrolling behavior. Set relative page size, only move when index is in new page?
+#   WHEN I SOMEHOW GET A LOT OF FREE TIME AND NEED SOMETING TO DO:
+#   -implement tab autocomplete + ex_command history scrolling
 
 # FIXME:
 
@@ -38,12 +38,6 @@ import windows, commands
 
 
 #-----------------------------------------------------------------------
-
-# initialize curses
-stdscr = curses.initscr()
-curses.echo()
-curses.curs_set(0)
-
 
 def debug(stdscr):
     curses.nocbreak()
@@ -66,7 +60,7 @@ def main(stdscr):
         # wait for user input
         curses.curs_set(0)
         # usr input as decimal value
-        key = stdscr.getch(curses.LINES-1, curses.COLS-5)
+        key = vigrscr.get_key()
 
         if key == curses.KEY_RESIZE:
             resize_vigr()
@@ -81,7 +75,7 @@ def main(stdscr):
             curses.echo()
 
             #usr input as string
-            ex = stdscr.getstr(curses.LINES-1, 1).decode('utf-8')
+            ex = vigrscr.get_ex()
             if ex == chr(curses.KEY_RESIZE):
                 resize_vigr()
 
@@ -92,13 +86,14 @@ def main(stdscr):
                 commands.check_ex_commands(ex)
 
 
+
 # load_cmd is always the bottom row, other windows load from
 # left to right in the order that they are loaded
 def render_screen():
     if curses.LINES < 6:
        sys.exit("VIGR ERROR: Window Too Short!\n"\
              "   minimum window height is 6 lines.")
-    stdscr.noutrefresh()
+    vigrscr.stdscr.noutrefresh()
     windows.load_strand()
     windows.load_dna()
     windows.load_presentation()

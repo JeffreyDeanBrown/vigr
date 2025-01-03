@@ -1,13 +1,16 @@
-import files, textart, windows
+import files, textart, windows, curses_utils
 import re, curses
 
+command_history = []
+last_position = 1
+last_scale = 1
 
+def set_dna(index_, memory = True):
+    global last_position
+    if memory:
+        last_position = textart.dna.index
 
-def set_dna(index_):
-    if index_ == 0:
-        #ERROR: cannot set to zero (when usr error msgs implemented)
-        return
-    if index_ < 0:
+    if index_ <= 0:
         index_ = 1
     textart.dna.index = index_
     if textart.dna.index >= files.file.sequence_length:
@@ -20,16 +23,17 @@ def set_dna(index_):
 
 # dna string from windows is curses.LINES - 3
 
-def scale_dna(range_: int):
-    # WARNING: if you make a new dna text art, make sure windows.WDNA_W
-    # can accomodate the width of the text art!
-
+def scale_dna(range_: int, reset = True):
     #prevent setting a scale of 0
     # optional use: scale_dna(0) will resize dna chars without changing the offset
     if range_ == 0:
         pass
     else:
         textart.dna.offset = int(range_)
+
+    if reset:
+        global last_scale
+        last_scale = 1
 
     # FIXME:
     #       -make a "full sequence" subroutine and make this a call to that routine
@@ -42,7 +46,7 @@ def scale_dna(range_: int):
 
     files.file.reset_cols()
 
-    if textart.dna.offset < (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
+    if textart.dna.offset <= (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
         textart.dna.offset = (curses.LINES - 3) - 1
         medium_dna()
     else:
@@ -65,19 +69,48 @@ def down():
     if textart.dna.index + textart.dna.offset + _increment > files.file.sequence_length:
         return
     else:
-        set_dna(_move_to)
+        set_dna(_move_to, memory = False)
 
 def up():
     _increment = round((textart.dna.offset + 1)/windows.DNA_STRING_H)
     _move_to = textart.dna.index - _increment
-    set_dna(_move_to)
+    set_dna(_move_to, memory = False)
 
-ex_commands = {'big':big_dna}
+def beggining():
+    _key = curses_utils.vigrscr.get_key()
+    if _key == ord('g'):
+        set_dna(1)
+
+def end():
+    set_dna(files.file.sequence_length)
+
+def go_back():
+    global last_position
+    _buffer, last_position = last_position, textart.dna.index
+    set_dna(_buffer)
+
+def strand_level():
+    global last_scale
+    last_scale = textart.dna.offset
+    scale_dna(1)
+
+def scale_toggle():
+    global last_scale
+    _buffer, last_scale = last_scale, textart.dna.offset
+    scale_dna(_buffer, reset = False)
+
+
+ex_commands = {'big':big_dna,
+               'zoom':strand_level}
+
 vigr_commands = {ord('j'):down,
                  ord('k'):up,
                  curses.KEY_DOWN:down,
-                 curses.KEY_UP:up}
-
+                 curses.KEY_UP:up,
+                 ord('g'):beggining,
+                 ord('G'):end,
+                 15:go_back, # ^O
+                 ord('z'):scale_toggle}
 def check_ex_commands(cmd): #cmd comes in as a character string
 
     if cmd in ex_commands:
@@ -101,7 +134,10 @@ def check_ex_commands(cmd): #cmd comes in as a character string
     # FIXME
     #      make this DRY
     elif re.match("^scale", cmd):
-        scale_cmd = cmd.replace("scale ", "").replace(",","")
+        scale_cmd = cmd.replace("scale", "").replace(' ', '').replace(",","")
+        # no value given
+        if scale_cmd == '':
+            scale_dna(10000)
         # is an interger, can be delimited with commas
         if scale_cmd.isdigit():
             scale_dna(int(scale_cmd))
