@@ -1,5 +1,5 @@
 # VIGR
-**vi**-like **g**ff **r**eader
+**vi**-like **g**ff **r**eader (WIP)
 
 (WIP)
 
