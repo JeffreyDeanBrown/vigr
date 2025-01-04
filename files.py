@@ -1,23 +1,62 @@
-import gffutils, sqlite3
+import gffutils, sys, re, typing
+
+try:
+    sys.argv[1]
+except:
+    sys.exit("ERROR: no arguments given!\n"\
+             "\ttype 'vigr.py -h' for help\n")
+else:
+    if re.match(".*\.gff", sys.argv[1]):
+        gff_file = sys.argv[1]
+    elif '-g' in sys.argv:
+        _index = sys.argv.index('-g') + 1
+        if re.match(".*\.gff", sys.argv[_index]):
+            gff_file = sys.argv[_index]
+    else:
+        sys.exit("ERROR: no .gff file provided!\n"
+                 "\tPlease provide a .gff file using the following format:\n\n"\
+                 "\t\t'vigr.py [file]' -or- 'vigr.py -g [file]'\n")
 
 
 #FIXME
 
 class feature_presentation:
 
-    def __init__(self, filename = 'gff/1A_genome.gff', sequence_length = 328814,\
-                 seqid = 'NODE_1_length_328814_cov_187.267238'):
+    def __init__(self, filename = 'gff/1A_genome.gff'):
         self.db = gffutils.create_db(filename, 'database/vigr.db', force = True)
-        self.sequence_length = sequence_length
-        self.seqid = seqid
+
+        # get the seqids from the database
+        cursor = self.db.execute('SELECT seqid FROM features')
+        # save to disk
+        _results = cursor.fetchall()
+        # unnest row objects, sort
+        self.seqids = list(set([row['seqid'] for row in _results]))
+        self.seqids.sort(key = _undr_to_space)
+
+        self.sequence_name = self.seqids[0] #default to first sequence
+        self.set_sequence(self.sequence_name)
 
     features = []
 
-    def gff_parser(self, start, end):
-        #FIXME
-        # will have to actually implement this in the future
+    def set_sequence(self, sequence: typing.Union[int,str]):
 
-        subset = self.db.region(seqid = self.seqid, start = start, end = end)
+        if isinstance(sequence, int):
+            sequence = self.seqids[sequence]
+
+        self.sequence_name = sequence
+        # get where last feature in sequence ends
+        query = 'SELECT end FROM features WHERE seqid=="'\
+                + str(sequence) + '"'
+        cursor = self.db.execute(query)
+        # returns a list of row objects (with only 1 col each)
+        _results = cursor.fetchall()
+        self.sequence_length = max([row[0] for row in _results])
+
+
+    def gff_parser(self, start, end):
+
+        # get db within screen region
+        subset = self.db.region(seqid = self.sequence_name, start = start, end = end)
         # subset is an iterable of 'feature' objects
         # it may be faster to implement some way to iterate through
         # subset when rendering features to the screen, but I'll try
@@ -55,6 +94,10 @@ class feature_presentation:
             feature['col'] = None
 
 
+def _undr_to_space(i):
+    return(i.replace("_"," "))
 
-file = feature_presentation()
+
+
+file = feature_presentation(filename = gff_file)
 

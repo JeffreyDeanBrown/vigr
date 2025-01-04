@@ -9,9 +9,10 @@ from curses_utils import vigrscr
 # TODO:
 
 #   FUNCTIONALITY:
+#   -seqid in strand window
 #   -implement fasta file parsing & display nucleotides
-#   -gff file as argument, fasta file as argument, selecting sequence
-#   -swap gff and sequence from ex command
+#   -fasta file as argument
+#   -swap sequence from ex command
 #   -search using / + regex
 #   - :help function
 #   - get it to work with eukaryotic seuqences
@@ -29,13 +30,9 @@ from curses_utils import vigrscr
 # FIXME:
 
 #   COMMANDS.PY:
-#   -make comma and bp parsing DRY
-#   -cannot set_dna with comma delimited + kbp/mbp labeled (bp works though)
 #   -sometimes ignores when a window is resized
 #   -some features are resetting their cols after already being rendered
 #   -move feature drawing to a state function
-#   -not all features are populating at large scales now? or something?
-
 
 #-----------------------------------------------------------------------
 

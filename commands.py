@@ -1,18 +1,21 @@
 import files, textart, windows, curses_utils
-import re, curses
+import re, curses, typing
 
-command_history = []
 last_position = 1
 last_scale = 1
+DEFAULT_SCALE = 10000
 
 def set_dna(index_, memory = True):
     global last_position
-    if memory:
-        last_position = textart.dna.index
 
-    if index_ <= 0:
+    if index_ < 0:
         index_ = 1
-    textart.dna.index = index_
+
+    if index_:
+        if memory:
+            last_position = textart.dna.index
+        textart.dna.index = index_
+
     if textart.dna.index >= files.file.sequence_length:
         textart.dna.index = files.file.sequence_length - textart.dna.offset
     if (textart.dna.index + textart.dna.offset) > files.file.sequence_length:
@@ -23,13 +26,13 @@ def set_dna(index_, memory = True):
 
 # dna string from windows is curses.LINES - 3
 
-def scale_dna(range_: int, reset = True):
-    #prevent setting a scale of 0
+def scale_dna(range_, reset = True):
+    #prevent setting a scale of 0 or None
     # optional use: scale_dna(0) will resize dna chars without changing the offset
-    if range_ == 0:
-        pass
-    else:
-        textart.dna.offset = int(range_)
+    if range_:
+        if range_ < 0:
+            range_ = 1
+        textart.dna.offset = range_
 
     if reset:
         global last_scale
@@ -116,42 +119,34 @@ def check_ex_commands(cmd): #cmd comes in as a character string
     if cmd in ex_commands:
         run_it = ex_commands[cmd]
         run_it()
-    # is an interger, can be delimited with commas
-    elif cmd.replace(",","").isdigit():
-        set_dna(int(cmd.replace(",","")))
-    # is labeled bp, kbp, or mbp
-    elif re.match("^\d+.*bp", cmd.replace(",","")):
-        if cmd.replace("bp","").replace(",","").isdigit():
-            value = int(cmd.replace("bp","").replace(",",""))
-            set_dna(value)
-        elif cmd.replace("kbp","").isdigit():
-            value = int(cmd.replace("kbp","").replace(",","")) * 1000
-            set_dna(value)
-        elif cmd.replace("mbp","").isdigit():
-            value = int(cmd.replace("mbp","").replace(",","")) * 1_000_000
-            set_dna(value)
-    # repeat, but for scaling offset
-    # FIXME
-    #      make this DRY
+    # cmd is an int, or comma delimited int, or on "bp","kbp","mbp" scale
+    elif parse_comma_bp(cmd):
+        set_dna(parse_comma_bp(cmd))
+    # starts with "scale"
     elif re.match("^scale", cmd):
-        scale_cmd = cmd.replace("scale", "").replace(' ', '').replace(",","")
+        scale_cmd = cmd.replace("scale", "").replace(' ', '')
         # no value given
         if scale_cmd == '':
-            scale_dna(10000)
-        # is an interger, can be delimited with commas
-        if scale_cmd.isdigit():
-            scale_dna(int(scale_cmd))
-        # is labeled bp, kbp, or mbp
-        elif re.match(".*bp", scale_cmd):
-            if scale_cmd.replace("bp","").isdigit():
-                value = int(scale_cmd.replace("bp",""))
-                scale_dna(value)
-            elif scale_cmd.replace("kbp","").isdigit():
-                value = int(scale_cmd.replace("kbp","")) * 1000
-                scale_dna(value)
-            elif scale_cmd.replace("mbp","").isdigit():
-                value = int(scale_cmd.replace("mbp","")) * 1_000_000
-                scale_dna(value)
+            scale_dna(DEFAULT_SCALE)
+        else:
+            # check if comma delimited, parse "bp","kbp",or "mbp" scales
+            scale_dna(parse_comma_bp(scale_cmd))
+
+
+
+def parse_comma_bp(input: str)-> typing.Union[int,None]:
+
+    _ncomma = input.replace(",","").replace(" ","")
+
+    if _ncomma.replace("bp","").isdigit():
+        return(int(_ncomma.replace("bp","")))
+
+    elif _ncomma.replace("kbp","").isdigit():
+        return(int(_ncomma.replace("kbp","")) * 1000)
+
+    elif _ncomma.replace("mbp","").isdigit():
+        return(int(_ncomma.replace("mbp","")) * 1000000)
+
 
 
 def check_vigr_commands(cmd): #cmd comes in as a character string
