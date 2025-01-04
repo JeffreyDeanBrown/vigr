@@ -23,11 +23,16 @@ WDNA_W =  6 # current largest DNA text art is 5 wide
 # window positions (furthest left column)
 WSTRAND_X = 0
 WSTRAND_RULER_X = textart.strand.w + 1
-WDNA_RULER_X = WSTRAND_W + 1
+WDNA_RULER_X = WSTRAND_W
 WDNA_X = WDNA_RULER_X + WDNA_RULER_W
 WPRESENTATION_X = WDNA_X + WDNA_W
 
 FEATURE_SPACING = 10
+
+# render popup window next during next cycle
+render_popup = False
+popup_text = ""
+popup_label = ""
 
 #-----------------------------------------------------------------------
 
@@ -47,9 +52,9 @@ def load_dna():
 
     #start window at y = 1 to line up with strand border
     w_dna_ruler = curses.newwin(WDNA_H, WDNA_RULER_W, 1, WDNA_RULER_X)
-    w_dna_ruler.addstr('{:>9}'.format(dna_ruler_min) + "\n"\
-                      +"\n" * (DNA_STRING_H - 3)\
-                      +'{:>9}'.format(dna_ruler_max))
+    w_dna_ruler.addstr(dna_ruler_min.rjust(9) + "\n"\
+                      +"\n".rjust(9) * (DNA_STRING_H - 3)\
+                      +dna_ruler_max.rjust(9))
     w_dna_ruler.noutrefresh()
 
 #-----------------------------------------------------------------------
@@ -60,12 +65,18 @@ def load_strand():
     WSTRAND_ID_H = WSTRAND_H - 2 # inner diameter of border
 
 
-
     # fills w_strand with strand TxtArt, but cuts off ends and adds border
     w_strand = curses.newwin(WSTRAND_H, WSTRAND_W, 0, WSTRAND_X)
     w_strand.addstr(textart.strand.fill(WSTRAND_H))
     w_strand.border()
 
+    #labels w_strand with sequence id
+    if len(files.file.sequence_name) > WSTRAND_W - 3:
+        _seq_label = files.file.sequence_name[:(WSTRAND_W-7)] + "..."
+    else:
+        _seq_label = files.file.sequence_name
+    #label is in the border for the ~*~aesthetics~*~
+    w_strand.addstr(0, 1, _seq_label)
 
 
     strand_ruler_max = basepair_format(files.file.sequence_length)
@@ -224,6 +235,29 @@ def load_presentation():
     #<<< label feature <<<
 
     w_presentation.noutrefresh()
+
+#-----------------------------------------------------------------------
+
+def load_popup():
+    global WPOPUP_H, WPOPUP_W, render_popup, popup_text, popup_label
+    global WPOPUP_ROWS, WPOPUP_COLS
+
+    # one for load_cmd, four for a gap
+    WPOPUP_H = curses.LINES - 5
+    WPOPUP_W = curses.COLS - 4
+    WPOPUP_ROWS = WPOPUP_H - 2 - 1 #borders and dont-draw-over
+    WPOPUP_COLS = WPOPUP_W - 2 - 1 #ditto
+
+
+    if render_popup:
+        w_popup = curses.newwin(WPOPUP_H, WPOPUP_W, 3, 3)
+        w_popup.border()
+        w_popup.addstr(0, 3, popup_label)
+        w_popup.noutrefresh()
+        w_popup_text = curses.newwin(WPOPUP_H-2, WPOPUP_W-2, 4, 4)
+        w_popup_text.addstr(popup_text)
+        w_popup_text.noutrefresh()
+        render_popup = False
 
 
 #-----------------------------------------------------------------------

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import curses, sys
-import windows, commands
+import windows, commands, textart, files
 from curses_utils import vigrscr
 
 #-----------------------------------------------------------------------
@@ -9,11 +9,8 @@ from curses_utils import vigrscr
 # TODO:
 
 #   FUNCTIONALITY:
-#   -seqid in strand window
 #   -implement fasta file parsing & display nucleotides
 #   -fasta file as argument
-#   -swap sequence from ex command
-#   -search using / + regex
 #   - :help function
 #   - get it to work with eukaryotic seuqences
 #   -that's it!
@@ -23,6 +20,7 @@ from curses_utils import vigrscr
 #   -add docstring to everything
 #   -implement subroutine for getting messages to user
 #   -annotate function types + argument types
+#   -search using / + regex, g/re/p across all sequences
 #
 #   WHEN I SOMEHOW GET A LOT OF FREE TIME AND NEED SOMETING TO DO:
 #   -implement tab autocomplete + ex_command history scrolling
@@ -87,13 +85,22 @@ def main(stdscr):
 # load_cmd is always the bottom row, other windows load from
 # left to right in the order that they are loaded
 def render_screen():
+    # check if window is large enough
     if curses.LINES < 6:
        sys.exit("VIGR ERROR: Window Too Short!\n"\
              "   minimum window height is 6 lines.")
+
+    # check if default offset of 10,000bp is an OK size
+    if files.file.sequence_length < 40000:
+        textart.dna.offset = files.file.sequence_length // 4
+    else:
+        textart.dna.offset = 9999
+
     vigrscr.stdscr.noutrefresh()
     windows.load_strand()
     windows.load_dna()
     windows.load_presentation()
+    windows.load_popup()
     windows.load_cmd(refresh_only = True)
     curses.doupdate()
 

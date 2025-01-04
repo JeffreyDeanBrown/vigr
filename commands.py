@@ -102,9 +102,61 @@ def scale_toggle():
     _buffer, last_scale = last_scale, textart.dna.offset
     scale_dna(_buffer, reset = False)
 
+def render_popup():
+    windows.render_popup = True
+
+def popup_seqids():
+    # format seqids to "[index]:[seqid]..." with max length of 15
+    sequences = []
+    for name in files.file.seqids:
+        n = files.file.seqids.index(name)
+        string = str(n)+":"+name
+        if len(string) > 20:
+            string = string[:17] + '...'
+        sequences.append(string)
+
+    # split list into columns which matches the height of w_popup
+    sequence_cols = []
+    text_cols = windows.WPOPUP_COLS
+    text_rows = windows.WPOPUP_ROWS
+
+    for x in range(0, len(sequences), text_cols):
+        _buffer = sequences[x:x + text_cols]
+        if len(_buffer) < text_cols:
+            extra = text_cols - len(_buffer)
+            i = 0
+            while i < extra:
+                _buffer.append(" ")
+                i += 1
+        sequence_cols.append(_buffer)
+
+    # merge all rows of each col into a string
+    sequence_rows = []
+    i = 0
+    while i < len(sequence_cols[0]):
+        string = ""
+        for col in sequence_cols:
+            string = string + col[i] + " "
+        if len(string) > text_rows:
+            string = string[:text_rows-5] + "...!!"
+        sequence_rows.append(string)
+        i += 1
+
+    windows.popup_text = "\n".join(sequence_rows)
+    windows.popup_label = "available sequences:"
+    render_popup()
+
+def switch_sequence(seq_name):
+    if seq_name.isdigit():
+        if int(seq_name) < len(files.file.seqids):
+            files.file.set_sequence(int(seq_name))
+    elif seq_name in files.file.seqids:
+        files.file.set_sequence(seq_name)
+
 
 ex_commands = {'big':big_dna,
-               'zoom':strand_level}
+               'zoom':strand_level,
+               'seqs': popup_seqids}
 
 vigr_commands = {ord('j'):down,
                  ord('k'):up,
@@ -114,6 +166,8 @@ vigr_commands = {ord('j'):down,
                  ord('G'):end,
                  15:go_back, # ^O
                  ord('z'):scale_toggle}
+
+
 def check_ex_commands(cmd): #cmd comes in as a character string
 
     if cmd in ex_commands:
@@ -131,6 +185,9 @@ def check_ex_commands(cmd): #cmd comes in as a character string
         else:
             # check if comma delimited, parse "bp","kbp",or "mbp" scales
             scale_dna(parse_comma_bp(scale_cmd))
+    elif re.match("^seq ", cmd):
+        seq_cmd = cmd.replace("seq ","")
+        switch_sequence(seq_cmd)
 
 
 

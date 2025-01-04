@@ -18,8 +18,6 @@ else:
                  "\t\t'vigr.py [file]' -or- 'vigr.py -g [file]'\n")
 
 
-#FIXME
-
 class feature_presentation:
 
     def __init__(self, filename = 'gff/1A_genome.gff'):
@@ -43,7 +41,7 @@ class feature_presentation:
         if isinstance(sequence, int):
             sequence = self.seqids[sequence]
 
-        self.sequence_name = sequence
+        self.sequence_name = str(sequence)
         # get where last feature in sequence ends
         query = 'SELECT end FROM features WHERE seqid=="'\
                 + str(sequence) + '"'
