@@ -1,7 +1,8 @@
 import curses
-import files
+import files, curses_utils
 import math
 import textart
+from Bio.Seq import Seq
 
 #-----------------------------------------------------------------------
 
@@ -47,6 +48,16 @@ def load_dna():
     #start window at y = 1 to line up with border
     w_dna = curses.newwin(WDNA_H, WDNA_W, 1, WDNA_X)
     w_dna.addstr(textart.dna.fill(DNA_STRING_H))
+
+    #parse nucleotides
+    if textart.dna.IS_ZOOM:
+        for row in range(DNA_STRING_H):
+            nuc = files.file.sequence[textart.dna.index + row - 1]
+            cnuc = files.file.sequence.complement()[textart.dna.index + row - 1]
+            w_dna.addch(row, 1, nuc)
+            w_dna.addch(row, 3, cnuc)
+
+
     w_dna.noutrefresh()
 
 
@@ -111,14 +122,16 @@ def load_strand():
 #-----------------------------------------------------------------------
 
 def load_presentation():
+    global w_presentation
+
     WPRESENTATION_H = curses.LINES - 1
     PRES_STRING_H = DNA_STRING_H
     WPRESENTATION_W = curses.COLS - WPRESENTATION_X
 
-    #FIXME
     files.file.gff_parser(start = textart.dna.index, end = textart.dna.index + textart.dna.offset)
 
     w_presentation = curses.newwin(WPRESENTATION_H, WPRESENTATION_W, 0, WPRESENTATION_X)
+    w_presentation.clear()
 
     _occupied_tiles = [] # y,x
 
@@ -165,78 +178,81 @@ def load_presentation():
             for row in range(WPRESENTATION_H):
                 w_presentation.addstr(row, WPRESENTATION_W-3,'!!', curses.A_ITALIC)
         else:
-
-
                                      # ↧  ↥    ▲  𓏚   ⭡ ↓ ↑  Ʌ⯆    ▼↓ ⇂⭣▲
-            if len(_offset_list) == 1:
-                feature['tiles'] = (_index, _index)
-                if _lower_cutoff:
-                    if feature['strand'] == '+':
-                         w_presentation.addstr(_index, _col, 'V')
+            if _offset_list:
+                if len(_offset_list) == 1:
+                    feature['tiles'] = (_index, _index)
+                    if _lower_cutoff:
+                        if feature['strand'] == '+':
+                             w_presentation.addstr(_index, _col, 'V')
+                        else:
+                             w_presentation.addstr(_index, _col, '╵')
+                    elif _upper_cutoff:
+                        if feature['strand'] == '+':
+                             w_presentation.addstr(_index, _col, '╷')
+                        else:
+                             w_presentation.addstr(_index, _col, 'Ʌ')
                     else:
-                         w_presentation.addstr(_index, _col, '╵')
-                elif _upper_cutoff:
-                    if feature['strand'] == '+':
-                         w_presentation.addstr(_index, _col, '╷')
-                    else:
-                         w_presentation.addstr(_index, _col, 'Ʌ')
+                        if feature['strand'] == '+':
+                             w_presentation.addstr(_index, _col, '⭣', curses.A_BOLD)
+                        else:
+                             w_presentation.addstr(_index, _col, '⭡', curses.A_BOLD)
                 else:
-                    if feature['strand'] == '+':
-                         w_presentation.addstr(_index, _col, '⭣', curses.A_BOLD)
+                    feature['tiles'] = (_index, _index + _offset_list[-1])
+                    if _lower_cutoff:
+                        w_presentation.addstr(_index, _col, '│')
                     else:
-                         w_presentation.addstr(_index, _col, '⭡', curses.A_BOLD)
-            else:
-                feature['tiles'] = (_index, _index + _offset_list[-1])
-                if _lower_cutoff:
-                    w_presentation.addstr(_index, _col, '│')
-                else:
-                    if feature['strand'] == '+':
-                         w_presentation.addstr(_index, _col, '╷')
+                        if feature['strand'] == '+':
+                             w_presentation.addstr(_index, _col, '╷')
+                        else:
+                             w_presentation.addstr(_index, _col, 'Ʌ')
+                    if _upper_cutoff:
+                        w_presentation.addstr(_index + _offset_list[-1], _col, '│')
                     else:
-                         w_presentation.addstr(_index, _col, 'Ʌ')
-                if _upper_cutoff:
-                    w_presentation.addstr(_index + _offset_list[-1], _col, '│')
-                else:
-                    if feature['strand'] == '+':
-                        w_presentation.addstr(_index + _offset_list[-1], _col, 'V')
-                    else:
-                        w_presentation.addstr(_index + _offset_list[-1], _col, '╵')
+                        if feature['strand'] == '+':
+                            w_presentation.addstr(_index + _offset_list[-1], _col, 'V')
+                        else:
+                            w_presentation.addstr(_index + _offset_list[-1], _col, '╵')
 
-                _offset_list = _offset_list[1:-1]
+                    _offset_list = _offset_list[1:-1]
 
-                for _offset in _offset_list:
-                    w_presentation.addstr(_index + _offset, _col, '│')
+                    for _offset in _offset_list:
+                        w_presentation.addstr(_index + _offset, _col, '│')
 
     #<<< render feature <<<
 
     #>>> label feature >>>
     for feature in files.file.features:
         if feature['tiles'] != None: # if this feature exists
-            start, end = feature['tiles']
-            if feature['name']:
-                name = feature['name'][0]
-            else:
-                name = ''
-            product = feature['product']
-            label = ' ' + feature['featuretype'] + ': ' + name + " ("\
-                    + product + ")"
-            can_print = False
+            if feature['col'] != None:
+                start, end = feature['tiles']
+                if feature['name']:
+                    name = feature['name'][0]
+                else:
+                    name = ''
+                if feature['product']:
+                    product = "(" + feature['product'][0] + ")"
+                else:
+                    product = ''
+                label = ' ' + feature['featuretype'] + ': ' + name + product
+                can_print = False
 
-            for row in range(start, end+1):
-                for char in range(1, len(label)+1):
-                    if ((row, feature['col']+char) in _occupied_tiles) or ((feature['col'] + char) >= WPRESENTATION_W):
-                        can_print = False
+                for row in range(start, end+1):
+                    for char in range(1, len(label)+1):
+                        if ((row, feature['col']+char) in _occupied_tiles) or ((feature['col'] + char) >= WPRESENTATION_W):
+                            can_print = False
+                            break
+                        else:
+                            can_print = True
+                    if can_print:
+                        w_presentation.addstr(row, feature['col'] + 1, label)
                         break
-                    else:
-                        can_print = True
-                if can_print:
-                    w_presentation.addstr(row, feature['col'] + 1, label)
-                    break
     #<<< label feature <<<
 
     w_presentation.noutrefresh()
 
 #-----------------------------------------------------------------------
+
 
 def load_popup():
     global WPOPUP_H, WPOPUP_W, render_popup, popup_text, popup_label

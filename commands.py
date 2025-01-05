@@ -51,20 +51,25 @@ def scale_dna(range_, reset = True):
 
     if textart.dna.offset <= (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
         textart.dna.offset = (curses.LINES - 3) - 1
-        medium_dna()
+        if files.HAS_FASTA:
+            big_dna()
+        else:
+            medium_dna()
     else:
         small_dna()
 
 
 def small_dna():
     textart.dna.update_text(new_text = "┠┨\n")
+    textart.dna.not_zoom()
 
 def medium_dna():
     textart.dna.update_text("├┄┤\n")
+    textart.dna.not_zoom()
 
 def big_dna():
-    textart.dna.update_text("┣┅┅┅┫\n"\
-                            "┃   ┃\n")
+    textart.dna.update_text("┣X┅X┫\n")
+    textart.dna.is_zoom()
 
 def down():
     _increment = round((textart.dna.offset + 1)/windows.DNA_STRING_H)
@@ -107,23 +112,23 @@ def render_popup():
 
 def popup_seqids():
     # format seqids to "[index]:[seqid]..." with max length of 15
-    sequences = []
+    seqs = []
     for name in files.file.seqids:
         n = files.file.seqids.index(name)
         string = str(n)+":"+name
         if len(string) > 20:
             string = string[:17] + '...'
-        sequences.append(string)
+        seqs.append(string)
 
     # split list into columns which matches the height of w_popup
     sequence_cols = []
     text_cols = windows.WPOPUP_COLS
     text_rows = windows.WPOPUP_ROWS
 
-    for x in range(0, len(sequences), text_cols):
-        _buffer = sequences[x:x + text_cols]
-        if len(_buffer) < text_cols:
-            extra = text_cols - len(_buffer)
+    for x in range(0, len(seqs), text_rows):
+        _buffer = seqs[x:x + text_rows]
+        if len(_buffer) < text_rows:
+            extra = text_rows - len(_buffer)
             i = 0
             while i < extra:
                 _buffer.append(" ")
@@ -137,7 +142,7 @@ def popup_seqids():
         string = ""
         for col in sequence_cols:
             string = string + col[i] + " "
-        if len(string) > text_rows:
+        if len(string) > text_cols:
             string = string[:text_rows-5] + "...!!"
         sequence_rows.append(string)
         i += 1
@@ -153,10 +158,46 @@ def switch_sequence(seq_name):
     elif seq_name in files.file.seqids:
         files.file.set_sequence(seq_name)
 
+def space_features(space):
+    if space.isdigit():
+        space = int(space)
+        if space > 0:
+            windows.FEATURE_SPACING = space
+            files.file.reset_cols()
+
+def select_feature_types(selection):
+    if selection:
+        files.SHOW_ALL_FEATURES = False
+        files.select_featuretypes = selection
+    else:
+        files.SHOW_ALL_FEATURES = True
+    files.file.clear_features()
+
+def set_children(parent):
+    if parent:
+        for feature in files.file.features:
+            if feature['name']:
+                if feature['name'][0] == parent:
+                    parent_id = feature['id']
+                    files.named_parent = parent_id
+                    files.CHILDREN_ONLY = True
+                    files.SHOW_ALL_FEATURES = True
+    else:
+        files.named_parent = None
+        files.CHILDREN_ONLY = False
+    files.file.clear_features()
+
+def reset_constraints():
+    files.named_parent = None
+    files.select_featuretypes = ['gene']
+    files.SHOW_ALL_FEATURES = True
+    files.CHILDREN_ONLY = False
+
 
 ex_commands = {'big':big_dna,
                'zoom':strand_level,
-               'seqs': popup_seqids}
+               'seqs': popup_seqids,
+               'reset':reset_constraints}
 
 vigr_commands = {ord('j'):down,
                  ord('k'):up,
@@ -188,6 +229,15 @@ def check_ex_commands(cmd): #cmd comes in as a character string
     elif re.match("^seq ", cmd):
         seq_cmd = cmd.replace("seq ","")
         switch_sequence(seq_cmd)
+    elif re.match("^space ", cmd):
+        space_cmd = cmd.replace("space ","")
+        space_features(space_cmd)
+    elif re.match("^select", cmd):
+        select_cmd = cmd.replace("select","")
+        select_feature_types(select_cmd)
+    elif re.match("^children", cmd):
+        children_cmd = cmd.replace("children","").replace(" ","")
+        set_children(children_cmd)
 
 
 

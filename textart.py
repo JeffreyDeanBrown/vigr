@@ -4,6 +4,7 @@ class TextArt:
 
     index = 1
     offset = 9999
+    IS_ZOOM = False
 
     def __init__(self, text, file_name = False):
         if file_name:
@@ -23,6 +24,12 @@ class TextArt:
 
     def update_text(self, new_text, file_name = False):
         self.__init__(text = new_text, file_name = file_name)
+
+    def is_zoom(self):
+        self.IS_ZOOM = True
+
+    def not_zoom(self):
+        self.IS_ZOOM = False
 
 #-----------------------------------------------------------------------
 

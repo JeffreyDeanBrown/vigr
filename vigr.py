@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import curses, sys
-import windows, commands, textart, files
+import windows, commands
 from curses_utils import vigrscr
 
 #-----------------------------------------------------------------------
@@ -9,18 +9,18 @@ from curses_utils import vigrscr
 # TODO:
 
 #   FUNCTIONALITY:
-#   -implement fasta file parsing & display nucleotides
-#   -fasta file as argument
-#   - :help function
-#   - get it to work with eukaryotic seuqences
+#   -:h[elp] function and $ vigr.py -h[elp]
+#   -setup installation script with venv stuff
 #   -that's it!
 #
-#   FEATURES:
+#   POTENTIAL FEATURES:
+#   -also show parent when showing children & label screen
 #   -add major and minor axis lines to strand ruler + labels
 #   -add docstring to everything
 #   -implement subroutine for getting messages to user
 #   -annotate function types + argument types
 #   -search using / + regex, g/re/p across all sequences
+#   -ability to parse .gff files which have fasta appended on the end
 #
 #   WHEN I SOMEHOW GET A LOT OF FREE TIME AND NEED SOMETING TO DO:
 #   -implement tab autocomplete + ex_command history scrolling
@@ -90,12 +90,6 @@ def render_screen():
        sys.exit("VIGR ERROR: Window Too Short!\n"\
              "   minimum window height is 6 lines.")
 
-    # check if default offset of 10,000bp is an OK size
-    if files.file.sequence_length < 40000:
-        textart.dna.offset = files.file.sequence_length // 4
-    else:
-        textart.dna.offset = 9999
-
     vigrscr.stdscr.noutrefresh()
     windows.load_strand()
     windows.load_dna()
@@ -103,6 +97,7 @@ def render_screen():
     windows.load_popup()
     windows.load_cmd(refresh_only = True)
     curses.doupdate()
+
 
 def resize_vigr():
     curses.update_lines_cols()
