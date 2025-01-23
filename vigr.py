@@ -11,15 +11,24 @@ from curses_utils import vigrscr
 #   FUNCTIONALITY:
 #   -:h[elp] function and $ vigr.py -h[elp]
 #   -setup installation script with venv stuff
+#   -set dna ladder to explicit location
 #   -that's it!
 #
-#   POTENTIAL FEATURES:
-#   -also show parent when showing children & label screen
-#   -add major and minor axis lines to strand ruler + labels
+#   PRE-RELEASE CHECKLIST:
+#   -reformat like you mean it
+#   -make sure ex command names make sense, add shortcuts
 #   -add docstring to everything
-#   -implement subroutine for getting messages to user
 #   -annotate function types + argument types
-#   -search using / + regex, g/re/p across all sequences
+#   -setup minimum columns + break
+#   -benchmark + optimize
+#   - :select all & children none
+#   -clear out all FIXMEs
+#
+#   POTENTIAL FEATURES:
+#   -also show parent when showing children & label screen w/parent name
+#   -add major and minor axis lines to strand ruler + labels
+#   -implement subroutine for getting messages to user
+#   -search using / + regex, g/re/p across all sequences in gff
 #   -ability to parse .gff files which have fasta appended on the end
 #
 #   WHEN I SOMEHOW GET A LOT OF FREE TIME AND NEED SOMETING TO DO:
