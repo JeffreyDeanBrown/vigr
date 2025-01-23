@@ -1,6 +1,7 @@
 # VIGR
 **vi**-like **g**ff **r**eader
 A simple command-line .gff file reader for quicky perusing through sequencing data, with a similar feel to a vi text editor session. Currently a work in progress
+
 ![](https://github.com/JeffreyDeanBrown/vigr/blob/master/resource/vigr_demo.gif)
 
 # WIP
