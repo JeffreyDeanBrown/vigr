@@ -8,11 +8,10 @@ from curses_utils import vigrscr
 
 # TODO:
 
-#   FUNCTIONALITY:
+#   -reformat commands.py to make it easier to see commands
 #   -:h[elp] function and $ vigr.py -h[elp]
 #   -setup installation script with venv stuff
-#   -set dna ladder to explicit location
-#   -that's it!
+#   -use the term "contig" instead of seqs when choosing contigs
 #
 #   PRE-RELEASE CHECKLIST:
 #   -reformat like you mean it

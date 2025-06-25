@@ -68,7 +68,7 @@ def medium_dna():
     textart.dna.not_zoom()
 
 def big_dna():
-    textart.dna.update_text("┣X┅X┫\n")
+    textart.dna.update_text("┣X X┫\n")
     textart.dna.is_zoom()
 
 def down():
@@ -96,11 +96,6 @@ def go_back():
     global last_position
     _buffer, last_position = last_position, textart.dna.index
     set_dna(_buffer)
-
-def strand_level():
-    global last_scale
-    last_scale = textart.dna.offset
-    scale_dna(1)
 
 def scale_toggle():
     global last_scale
@@ -194,8 +189,7 @@ def reset_constraints():
     files.CHILDREN_ONLY = False
 
 
-ex_commands = {'big':big_dna,
-               'zoom':strand_level,
+ex_commands = {'zoom':scale_toggle,
                'seqs': popup_seqids,
                'reset':reset_constraints}
 
@@ -232,8 +226,8 @@ def check_ex_commands(cmd): #cmd comes in as a character string
     elif re.match("^space ", cmd):
         space_cmd = cmd.replace("space ","")
         space_features(space_cmd)
-    elif re.match("^select", cmd):
-        select_cmd = cmd.replace("select","")
+    elif re.match("^type", cmd):
+        select_cmd = cmd.replace("type","")
         select_feature_types(select_cmd)
     elif re.match("^children", cmd):
         children_cmd = cmd.replace("children","").replace(" ","")
