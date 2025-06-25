@@ -12,33 +12,34 @@ from curses_utils import vigrscr
 #   -:h[elp] function and $ vigr.py -h[elp]
 #   -setup installation script with venv stuff
 #   -use the term "contig" instead of seqs when choosing contigs
+#   -type removal
+#   -auto spacing, finding biggest label space, name cutoff
+#   -selecting features (mouse, arrow keys) and writing that name over others
 #
 #   PRE-RELEASE CHECKLIST:
 #   -reformat like you mean it
 #   -make sure ex command names make sense, add shortcuts
 #   -add docstring to everything
 #   -annotate function types + argument types
-#   -setup minimum columns + break
-#   -benchmark + optimize
 #   - :select all & children none
 #   -clear out all FIXMEs
 #
-#   POTENTIAL FEATURES:
+#   POTENTIAL ADDITIONS:
 #   -also show parent when showing children & label screen w/parent name
 #   -add major and minor axis lines to strand ruler + labels
 #   -implement subroutine for getting messages to user
-#   -search using / + regex, g/re/p across all sequences in gff
-#   -ability to parse .gff files which have fasta appended on the end
+#   -parse .gff files which have fasta appended on the end
 #
 #   WHEN I SOMEHOW GET A LOT OF FREE TIME AND NEED SOMETING TO DO:
 #   -implement tab autocomplete + ex_command history scrolling
+#   -search using / + regex, g/re/p across all sequences in gff
+#   -implement browsing or comparing multiple parent/children trees
 
 # FIXME:
 
 #   COMMANDS.PY:
-#   -sometimes ignores when a window is resized
+#   -sometimes ignores or bugs out when a window is resized
 #   -some features are resetting their cols after already being rendered
-#   -move feature drawing to a state function
 
 #-----------------------------------------------------------------------
 
