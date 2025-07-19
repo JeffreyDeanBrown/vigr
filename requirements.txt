@@ -1,2 +1,12 @@
-biopython
-gffutils
+argcomplete==3.5.3
+argh==0.31.3
+biopython==1.84
+click==8.1.8
+gffutils==0.13
+importlib_metadata==8.5.0
+numpy==2.2.1
+packaging==24.2
+pyfaidx==0.8.1.3
+repl==1.0
+simplejson==3.19.3
+zipp==3.21.0

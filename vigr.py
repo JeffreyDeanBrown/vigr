@@ -89,7 +89,7 @@ def main(stdscr):
             else:
                 commands.check_ex_commands(ex)
 
-
+#----------------------------------------------------------------------
 
 # load_cmd is always the bottom row, other windows load from
 # left to right in the order that they are loaded
@@ -98,13 +98,14 @@ def render_screen():
     if curses.LINES < 6:
        sys.exit("VIGR ERROR: Window Too Short!\n"\
              "   minimum window height is 6 lines.")
-
     vigrscr.stdscr.noutrefresh()
+
+    # load the windows
     windows.load_strand()
     windows.load_dna()
-    windows.load_presentation()
+    windows.load_main_window()
     windows.load_popup()
-    windows.load_cmd(refresh_only = True)
+    windows.load_cmd(refresh_only = True) #keep the command line as is
     curses.doupdate()
 
 

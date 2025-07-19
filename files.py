@@ -47,7 +47,7 @@ else:
 
 #-----------------------------------------------------------------------
 
-class feature_presentation:
+class feature_main_window:
 
     def __init__(self, filename = 'gff/1A_genome.gff'):
 
@@ -154,5 +154,5 @@ def _undr_to_space(i):
 
 
 
-file = feature_presentation(filename = gff_file)
+file = feature_main_window(filename = gff_file)
 
