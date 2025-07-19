@@ -15,6 +15,9 @@ from curses_utils import vigrscr
 #   -type removal
 #   -auto spacing, finding biggest label space, name cutoff
 #   -selecting features (mouse, arrow keys) and writing that name over others
+#   -setup a way to warn the user when the window is too small to list
+#    all of the seqs in :seqs (soon to be contigs in :contigs)
+#    as currently it just crashes when the window is too small
 #
 #   PRE-RELEASE CHECKLIST:
 #   -reformat like you mean it
@@ -38,7 +41,7 @@ from curses_utils import vigrscr
 # FIXME:
 
 #   COMMANDS.PY:
-#   -sometimes ignores or bugs out when a window is resized
+#   -ignores resize key if waiting for an ex command
 #   -some features are resetting their cols after already being rendered
 
 #-----------------------------------------------------------------------
@@ -55,23 +58,16 @@ def debug(stdscr):
 def main(stdscr):
     # initial setup
     curses.echo()
+    curses.curs_set(0) # set cursor to invisible
+    render_screen()
 
     #main loop
     while True:
-        curses.echo()
-        # apply last change
-        render_screen()
-        # wait for user input
-        curses.curs_set(0)
-        # usr input as decimal value
-        key = vigrscr.get_key()
+        curses.curs_set(0) # set cursor to invisible
+        key = vigrscr.get_key() # wait for user input
 
-        if key == curses.KEY_RESIZE:
-            resize_vigr()
-
-        elif key in commands.vigr_commands:
+        if key in commands.vigr_commands:
             commands.check_vigr_commands(key)
-
         elif key == ord(":"):
             # setup for : command
             windows.load_cmd(":")
@@ -80,20 +76,23 @@ def main(stdscr):
 
             #usr input as string
             ex = vigrscr.get_ex()
-            if ex == chr(curses.KEY_RESIZE):
-                resize_vigr()
 
-            elif ex == 'q':
+            if ex == 'q':
                 break # thank you have nice day
-
             else:
                 commands.check_ex_commands(ex)
+        render_screen() # apply changes
+        # The changes are setup and applied starting next loop
 
 #----------------------------------------------------------------------
 
 # load_cmd is always the bottom row, other windows load from
 # left to right in the order that they are loaded
 def render_screen():
+    #update to current terminal size
+    curses.update_lines_cols()
+    commands.scale_dna(0) # update dna scale
+
     # check if window is large enough
     if curses.LINES < 6:
        sys.exit("VIGR ERROR: Window Too Short!\n"\
@@ -104,15 +103,8 @@ def render_screen():
     windows.load_strand()
     windows.load_dna()
     windows.load_main_window()
-    windows.load_popup()
     windows.load_cmd(refresh_only = True) #keep the command line as is
     curses.doupdate()
-
-
-def resize_vigr():
-    curses.update_lines_cols()
-    commands.scale_dna(0) # update dna scale
-    render_screen()
 
 
 curses.wrapper(main)

@@ -1,8 +1,9 @@
 import curses
-import files, curses_utils
+import files
 import math
 import textart
 from Bio.Seq import Seq
+from curses_utils import vigrscr
 
 #-----------------------------------------------------------------------
 
@@ -21,6 +22,7 @@ wSTRAND_W = textart.strand.w + wSTRAND_RULER_W + 2 # 2 extra for the border
 wDNA_RULER_W = 9 # just 9 for value (max: xx,xxxkbp)
 wDNA_W =  6 # current largest DNA text art is 5 wide
 
+
 # window positions (furthest left column)
 wSTRAND_X = 0
 wSTRAND_RULER_X = textart.strand.w + 1
@@ -30,10 +32,6 @@ wMAIN_WINDOW_X = wDNA_X + wDNA_W
 
 FEATURE_SPACING = 10
 
-# render popup window next during next cycle
-render_popup = False
-popup_text = ""
-popup_label = ""
 
 #-----------------------------------------------------------------------
 
@@ -254,26 +252,68 @@ def load_main_window():
 #-----------------------------------------------------------------------
 
 
-def load_popup():
-    global WPOPUP_H, WPOPUP_W, render_popup, popup_text, popup_label
-    global WPOPUP_ROWS, WPOPUP_COLS
+def load_popup(text = "", label = "", _list = None):
 
-    # one for load_cmd, four for a gap
-    WPOPUP_H = curses.LINES - 5
-    WPOPUP_W = curses.COLS - 4
-    WPOPUP_ROWS = WPOPUP_H - 2 - 1 #borders and dont-draw-over
-    WPOPUP_COLS = WPOPUP_W - 2 - 1 #ditto
+    # popup window widths
+    wPOPUP_H = curses.LINES - 5 # 1 for load_cmd, 4 for a gap
+    wPOPUP_W = curses.COLS - 4
+    wPOPUP_ROWS = wPOPUP_H - 2 - 1 #borders and dont-draw-over
+    wPOPUP_COLS = wPOPUP_W - 2 - 1 #ditto
 
+    if _list: # a list needs to be sorted by columns and reorganized
 
-    if render_popup:
-        w_popup = curses.newwin(WPOPUP_H, WPOPUP_W, 3, 3)
-        w_popup.border()
-        w_popup.addstr(0, 3, popup_label)
-        w_popup.noutrefresh()
-        w_popup_text = curses.newwin(WPOPUP_H-2, WPOPUP_W-2, 4, 4)
-        w_popup_text.addstr(popup_text)
-        w_popup_text.noutrefresh()
-        render_popup = False
+        text_cols = wPOPUP_COLS
+        text_rows = wPOPUP_ROWS + 1 #something to do with indexing
+
+        # split list into columns which matches the height of w_popup
+        _list_by_col = [] # a matrix of seq split into cols
+        # i.e. [1,2,3,4,5,6,7,8] becomes [[1,2,3],[4,5,6],[7,8]]
+        # for: 1   4   7
+        #      2   5   8
+        #      3   6
+        for x in range(0, len(_list), text_rows):
+            #_column_values will list everything in each column, starting at
+            # column containing seq[0:text_rows] then seq[text_rows:text_rows*2]
+            # etc (remember: indexing using [] works as borders surrounding
+            #      values!)
+            _column_values = _list[x:x+text_rows]
+            if len(_column_values) < text_rows: # we are on a short col (last col)
+                empty_rows = text_rows - len(_column_values)
+                i = 0
+                while i < empty_rows:
+                    _column_values.append(" ")
+                    i += 1
+            _list_by_col.append(_column_values)
+
+        # index through the columns by row, appending to a "row" matrix
+        _list_by_row = []
+        i = 0
+        while i < len(_list_by_col[0]): # only run through longest column
+            string = ""
+            for col in _list_by_col:
+                string = string + col[i] + " "
+            if len(string) > text_cols:
+                string = string[:text_rows-5] + "...!!"
+            _list_by_row.append(string)
+            i += 1
+
+        text = "\n".join(_list_by_row) # all together now
+
+    #render the popup border and write the label
+    w_popup = curses.newwin(wPOPUP_H, wPOPUP_W, 3, 3)
+    w_popup.border()
+    w_popup.addstr(0, 3, label)
+    w_popup.noutrefresh()
+    #render the popup (main message) on top of the border
+    w_popup_text = curses.newwin(wPOPUP_H-2, wPOPUP_W-2, 4, 4)
+    w_popup_text.addstr(text)
+    w_popup_text.noutrefresh()
+
+    #keep the popup window active until the next keypress
+    curses.curs_set(0) # set cursor to invisible
+    vigrscr.get_key() # wait for user input
+    #after the user presses a key, the entire screen is re-rendered
+    #and the main loop resets
 
 
 #-----------------------------------------------------------------------

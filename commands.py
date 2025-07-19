@@ -102,9 +102,6 @@ def scale_toggle():
     _buffer, last_scale = last_scale, textart.dna.offset
     scale_dna(_buffer, reset = False)
 
-def render_popup():
-    windows.render_popup = True
-
 def popup_seqids():
     # format seqids to "[index]:[seqid]..." with max length of 15
     seqs = []
@@ -114,37 +111,9 @@ def popup_seqids():
         if len(string) > 20:
             string = string[:17] + '...'
         seqs.append(string)
-
-    # split list into columns which matches the height of w_popup
-    sequence_cols = []
-    text_cols = windows.WPOPUP_COLS
-    text_rows = windows.WPOPUP_ROWS
-
-    for x in range(0, len(seqs), text_rows):
-        _buffer = seqs[x:x + text_rows]
-        if len(_buffer) < text_rows:
-            extra = text_rows - len(_buffer)
-            i = 0
-            while i < extra:
-                _buffer.append(" ")
-                i += 1
-        sequence_cols.append(_buffer)
-
-    # merge all rows of each col into a string
-    sequence_rows = []
-    i = 0
-    while i < len(sequence_cols[0]):
-        string = ""
-        for col in sequence_cols:
-            string = string + col[i] + " "
-        if len(string) > text_cols:
-            string = string[:text_rows-5] + "...!!"
-        sequence_rows.append(string)
-        i += 1
-
-    windows.popup_text = "\n".join(sequence_rows)
-    windows.popup_label = "available sequences:"
-    render_popup()
+    #render it into a popup window
+    windows.load_popup(_list = seqs,
+                       label = "available sequences:")
 
 def switch_sequence(seq_name):
     if seq_name.isdigit():
