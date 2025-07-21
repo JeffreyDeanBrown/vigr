@@ -49,15 +49,15 @@ def main(stdscr):
     # initial setup
     curses.echo()
     curses.curs_set(0) # set cursor to invisible
-    load_windows()
+    render_windows()
 
     #main loop
     while True:
         curses.curs_set(0) # set cursor to invisible
         key = vigrscr.get_key() # wait for user input
 
-#       if key == curses.KEY_RESIZE:
-#           render_screen()
+        if key == curses.KEY_RESIZE:
+            resize_screen()
 
         if key in commands.vigr_commands:
             commands.check_vigr_commands(key)
@@ -70,17 +70,19 @@ def main(stdscr):
             #usr input as string
             ex = vigrscr.get_ex()
 
-            if ex == 'q':
+            if curses.is_term_resized(curses.LINES, curses.COLS):
+                resize_screen()
+            elif ex == 'q':
                 break # thank you have nice day
             else:
                 commands.check_ex_commands(ex)
 
-        render_screen() # apply changes
+        render_windows() # apply changes
         # The changes are setup and applied starting next loop
 
 #----------------------------------------------------------------------
 
-def render_screen():
+def resize_screen():
     curses.update_lines_cols()
     commands.scale_dna(0) #updates the scale
 
@@ -88,13 +90,13 @@ def render_screen():
     if curses.LINES < 6 or curses.COLS < 60:
         pass
     else:
-        load_windows()
+        render_windows()
 
 #----------------------------------------------------------------------
 
 # load_cmd is always the bottom row, other windows load from
 # left to right in the order that they are loaded
-def load_windows():
+def render_windows():
     vigrscr.stdscr.noutrefresh()
     windows.load_strand()
     windows.load_dna()

@@ -122,12 +122,12 @@ class feature_main_window:
 
             buffered_feat_dict.append({'id':feature.id,\
                            'start':feature.start,'end':feature.end,\
-                           'col':None, 'tiles':None,\
+                           'col':0, 'tiles':None,\
                            'featuretype':feature.featuretype,\
                            'name':feature.attributes.get('Name'),\
                            'product':feature.attributes.get('product'),\
                            'parent':feature.attributes.get('Parent'),\
-                           'strand':feature.strand})
+                           'strand':feature.strand, 'offset':0})
 
         for buffered_feature in buffered_feat_dict:
             if not any(buffered_feature['id'] == existing_feat['id']\
@@ -145,7 +145,7 @@ class feature_main_window:
 
     def reset_cols(self):
         for feature in self.features:
-            feature['col'] = None
+            feature['col'] = 0
 
     def clear_features(self):
         self.features = []

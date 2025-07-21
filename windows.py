@@ -122,34 +122,6 @@ def load_strand():
 def load_main_window():
     global w_main_window
 
-
-
-    #NOTES:
-    #
-    # currently each feature in the list files.file.features is
-    # being checked for cutoff, scaled, column assigned, and printed
-    # but really it only needs to be scaled and column assigned once
-    # with a cutoff check in the beggining? scaling might need to be
-    # more frequent, I need to think about it. But I think there should
-    # be a global list with all the current rendered features.
-
-    # I think it would work to:
-    # check for new features and clean up dropped features,
-    # refresh the index for all features,
-    # column assign and scale new or cutoff features,
-    # column assign and scale after the screen re-scales,
-    # and print all features
-    # for 'old' features, only the index changes
-    # for new or cutoff features, index and scale changes
-    # it might be useful to make an index_only option and have 1
-    # scale routine, as indexing requires scaling
-    # then another routine for column assignment
-    # and another routine for printing the feature
-
-    # honestly I would move all of this to a new python script
-    # and just start the window, call the scripts, and print the text
-    # from this script
-
     wMAIN_WINDOW_H = curses.LINES - 1
     PRES_STRING_H = DNA_STRING_H
     wMAIN_WINDOW_W = curses.COLS - wMAIN_WINDOW_X
@@ -161,7 +133,8 @@ def load_main_window():
 
     _occupied_tiles = [] # y,x
 
-    #>>> Render feature >>>
+    #>>> CREATE FEATURE >>>
+
     for feature in files.file.features:
 
         _lower_cutoff = False
@@ -192,99 +165,101 @@ def load_main_window():
         #_offset_list is a list of rows to fill in
         _offset_list = list(range(_scaled['scaled_offset'] + 1))
 
-        #>> COLUMN MANAGEMENT >>
+    #<<< CREATE FEATURE <<<
+
+    #>>> COLUMN MANAGEMENT >>>
+
         #if the feature is assigned a column "col" already:
         #   keep the same column
-        if feature['col']:
-            _col = feature['col']
-        else:
+        if not feature['col']:
             #keep trying cols until you get to an empty one
-            _col = 0
+
+            #feature['col'] = 0
             for _offset in _offset_list:
-                while ((_index + _offset), _col) in _occupied_tiles:
-                    _col += FEATURE_SPACING
-            feature['col'] = _col
+                while ((_index + _offset), feature['col']) in _occupied_tiles:
+                    feature['col'] += FEATURE_SPACING
 
         for _offset in _offset_list:
-            _occupied_tiles.append(((_index+_offset), _col))
+            _occupied_tiles.append(((_index+_offset), feature['col']))
 
-        if (_col + wMAIN_WINDOW_X) >= curses.COLS - 2:
+        if (feature['col'] + wMAIN_WINDOW_X) >= curses.COLS - 2:
             # ERROR: too many cols!
             for row in range(wMAIN_WINDOW_H):
                 w_main_window.addstr(row, wMAIN_WINDOW_W-3,'!!', curses.A_ITALIC)
-        # << COLUMN MANAGEMENT <<
-        # >> PRINT FEATURE >>
-        else:         # ↧  ↥    ▲  𓏚   ⭡ ↓ ↑  Ʌ⯆    ▼↓ ⇂⭣▲
-            if _offset_list:
-                if len(_offset_list) == 1:
-                    feature['tiles'] = (_index, _index)
-                    if _lower_cutoff:
-                        if feature['strand'] == '+':
-                             w_main_window.addstr(_index, _col, 'V')
-                        else:
-                             w_main_window.addstr(_index, _col, '╵')
-                    elif _upper_cutoff:
-                        if feature['strand'] == '+':
-                             w_main_window.addstr(_index, _col, '╷')
-                        else:
-                             w_main_window.addstr(_index, _col, 'Ʌ')
-                    else:
-                        if feature['strand'] == '+':
-                             w_main_window.addstr(_index, _col, '⭣', curses.A_BOLD)
-                        else:
-                             w_main_window.addstr(_index, _col, '⭡', curses.A_BOLD)
+            continue #don't print that feature
+
+    # <<< COLUMN MANAGEMENT <<<
+
+    # >>> PRINT FEATURE >>>
+
+        # ↧  ↥   ▲  𓏚   ⭡ ↓ ↑  Ʌ⯆    ▼↓ ⇂⭣▲
+        if len(_offset_list) == 1:
+            feature['tiles'] = (_index, _index)
+            if _lower_cutoff:
+                if feature['strand'] == '+':
+                     w_main_window.addstr(_index, feature['col'], 'V')
                 else:
-                    feature['tiles'] = (_index, _index + _offset_list[-1])
-                    if _lower_cutoff:
-                        w_main_window.addstr(_index, _col, '│')
-                    else:
-                        if feature['strand'] == '+':
-                             w_main_window.addstr(_index, _col, '╷')
-                        else:
-                             w_main_window.addstr(_index, _col, 'Ʌ')
-                    if _upper_cutoff:
-                        w_main_window.addstr(_index + _offset_list[-1], _col, '│')
-                    else:
-                        if feature['strand'] == '+':
-                            w_main_window.addstr(_index + _offset_list[-1], _col, 'V')
-                        else:
-                            w_main_window.addstr(_index + _offset_list[-1], _col, '╵')
+                     w_main_window.addstr(_index, feature['col'], '╵')
+            elif _upper_cutoff:
+                if feature['strand'] == '+':
+                     w_main_window.addstr(_index, feature['col'], '╷')
+                else:
+                     w_main_window.addstr(_index, feature['col'], 'Ʌ')
+            else:
+                if feature['strand'] == '+':
+                     w_main_window.addstr(_index, feature['col'], '⭣', curses.A_BOLD)
+                else:
+                     w_main_window.addstr(_index, feature['col'], '⭡', curses.A_BOLD)
+        else:
+            feature['tiles'] = (_index, _index + _offset_list[-1])
+            if _lower_cutoff:
+                w_main_window.addstr(_index, feature['col'], '│')
+            else:
+                if feature['strand'] == '+':
+                     w_main_window.addstr(_index, feature['col'], '╷')
+                else:
+                     w_main_window.addstr(_index, feature['col'], 'Ʌ')
+            if _upper_cutoff:
+                w_main_window.addstr(_index + _offset_list[-1], feature['col'], '│')
+            else:
+                if feature['strand'] == '+':
+                    w_main_window.addstr(_index + _offset_list[-1], feature['col'], 'V')
+                else:
+                    w_main_window.addstr(_index + _offset_list[-1], feature['col'], '╵')
 
-                    _offset_list = _offset_list[1:-1]
+            _offset_list = _offset_list[1:-1]
 
-                    for _offset in _offset_list:
-                        w_main_window.addstr(_index + _offset, _col, '│')
-        #<< PRINT FEATURE <<
+            for _offset in _offset_list:
+                w_main_window.addstr(_index + _offset, feature['col'], '│')
 
-
-    #<<< render feature <<<
+    #<<< PRINT FEATURE <<<
 
     #>>> label feature >>>
-    for feature in files.file.features:
-        if feature['tiles'] != None: # if this feature exists
-            if feature['col'] != None:
-                start, end = feature['tiles']
-                if feature['name']:
-                    name = feature['name'][0]
-                else:
-                    name = ''
-                if feature['product']:
-                    product = "(" + feature['product'][0] + ")"
-                else:
-                    product = ''
-                label = ' ' + feature['featuretype'] + ': ' + name + product
-                can_print = False
 
-                for row in range(start, end+1):
-                    for char in range(1, len(label)+1):
-                        if ((row, feature['col']+char) in _occupied_tiles) or ((feature['col'] + char) >= wMAIN_WINDOW_W):
-                            can_print = False
-                            break
-                        else:
-                            can_print = True
-                    if can_print:
-                        w_main_window.addstr(row, feature['col'] + 1, label)
-                        break
+    for feature in files.file.features:
+        start, end = feature['tiles']
+        if feature['name']:
+            name = feature['name'][0]
+        else:
+            name = ''
+        if feature['product']:
+            product = "(" + feature['product'][0] + ")"
+        else:
+            product = ''
+        label = ' ' + feature['featuretype'] + ': ' + name + product
+        can_print = False
+
+        for row in range(start, end+1):
+            for char in range(1, len(label)+1):
+                if ((row, feature['col']+char) in _occupied_tiles) or ((feature['col'] + char) >= wMAIN_WINDOW_W):
+                    can_print = False
+                    break
+                else:
+                    can_print = True
+            if can_print:
+                w_main_window.addstr(row, feature['col'] + 1, label)
+                break
+
     #<<< label feature <<<
 
     w_main_window.noutrefresh()
