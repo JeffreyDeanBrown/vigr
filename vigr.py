@@ -32,9 +32,9 @@ from curses_utils import vigrscr
 #   -implement browsing or comparing multiple parent/children trees
 #
 # FIXME:
-#   -fix jumps due to changes in offset and maybe index
+#   -cutoff features (rarely) extend by 1 line when scrolling
 #   -weird flashing glitch when shrinking screen in both x and y too fast
-#   -crashes when too small (not catching size excemptions)
+#   -crashes when resized too small too fast (sometimes)
 #
 #-----------------------------------------------------------------------
 
@@ -88,16 +88,16 @@ def main(stdscr):
 def resize_screen():
     curses.update_lines_cols()
     commands.scale_dna(0) #updates the scale, will also update features
-
-    # check if window is large enough
-    if curses.LINES > 6 and curses.COLS > 60:
-        render_windows()
+    render_windows()
 
 #----------------------------------------------------------------------
 
 # load_cmd is always the bottom row, other windows load from
 # left to right in the order that they are loaded
 def render_windows():
+    # check if window is large enough
+    if curses.LINES < 8 or curses.COLS < 60:
+        return
     vigrscr.stdscr.noutrefresh()
     windows.load_strand()
     windows.load_dna()
