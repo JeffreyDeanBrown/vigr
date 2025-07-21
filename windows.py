@@ -122,6 +122,34 @@ def load_strand():
 def load_main_window():
     global w_main_window
 
+
+
+    #NOTES:
+    #
+    # currently each feature in the list files.file.features is
+    # being checked for cutoff, scaled, column assigned, and printed
+    # but really it only needs to be scaled and column assigned once
+    # with a cutoff check in the beggining? scaling might need to be
+    # more frequent, I need to think about it. But I think there should
+    # be a global list with all the current rendered features.
+
+    # I think it would work to:
+    # check for new features and clean up dropped features,
+    # refresh the index for all features,
+    # column assign and scale new or cutoff features,
+    # column assign and scale after the screen re-scales,
+    # and print all features
+    # for 'old' features, only the index changes
+    # for new or cutoff features, index and scale changes
+    # it might be useful to make an index_only option and have 1
+    # scale routine, as indexing requires scaling
+    # then another routine for column assignment
+    # and another routine for printing the feature
+
+    # honestly I would move all of this to a new python script
+    # and just start the window, call the scripts, and print the text
+    # from this script
+
     wMAIN_WINDOW_H = curses.LINES - 1
     PRES_STRING_H = DNA_STRING_H
     wMAIN_WINDOW_W = curses.COLS - wMAIN_WINDOW_X
@@ -139,29 +167,38 @@ def load_main_window():
         _lower_cutoff = False
         _upper_cutoff = False
 
+        #check if start of feature is cutoff
         if feature['start'] < textart.dna.index:
             _start = textart.dna.index
             _lower_cutoff = True
         else:
             _start = feature['start']
 
+        #check if end of feature is cutoff
         if feature['end'] > (textart.dna.index + textart.dna.offset):
             _end = (textart.dna.index + textart.dna.offset)
             _upper_cutoff = True
         else:
             _end = feature['end']
 
+        #returns dict {scaled_index:, scaled_offset}
         _scaled = scale_to_vigr(index = _start - textart.dna.index,\
                                              offset = _end - _start,\
                                              char_scale = PRES_STRING_H,\
                                              int_scale = textart.dna.offset + 1)
 
+        #_index is the starting row
         _index = _scaled['scaled_index'] + 1 #line up with border
+        #_offset_list is a list of rows to fill in
         _offset_list = list(range(_scaled['scaled_offset'] + 1))
 
+        #>> COLUMN MANAGEMENT >>
+        #if the feature is assigned a column "col" already:
+        #   keep the same column
         if feature['col']:
             _col = feature['col']
         else:
+            #keep trying cols until you get to an empty one
             _col = 0
             for _offset in _offset_list:
                 while ((_index + _offset), _col) in _occupied_tiles:
@@ -175,8 +212,9 @@ def load_main_window():
             # ERROR: too many cols!
             for row in range(wMAIN_WINDOW_H):
                 w_main_window.addstr(row, wMAIN_WINDOW_W-3,'!!', curses.A_ITALIC)
-        else:
-                                     # ↧  ↥    ▲  𓏚   ⭡ ↓ ↑  Ʌ⯆    ▼↓ ⇂⭣▲
+        # << COLUMN MANAGEMENT <<
+        # >> PRINT FEATURE >>
+        else:         # ↧  ↥    ▲  𓏚   ⭡ ↓ ↑  Ʌ⯆    ▼↓ ⇂⭣▲
             if _offset_list:
                 if len(_offset_list) == 1:
                     feature['tiles'] = (_index, _index)
@@ -216,6 +254,8 @@ def load_main_window():
 
                     for _offset in _offset_list:
                         w_main_window.addstr(_index + _offset, _col, '│')
+        #<< PRINT FEATURE <<
+
 
     #<<< render feature <<<
 
@@ -337,6 +377,7 @@ def load_cmd(input = None, refresh_only = False):
         w_cmd.addstr(" " * (curses.COLS-1))
     w_cmd.noutrefresh()
 
+#-----------------------------------------------------------------------
 
 def basepair_format(unformatted :int) -> str:
     if unformatted < 10_000:
@@ -348,6 +389,7 @@ def basepair_format(unformatted :int) -> str:
         return(str(round(unformatted / 1_000_000))\
                   + "mpb")
 
+#-----------------------------------------------------------------------
 
 def scale_to_vigr(index, offset, char_scale, int_scale) -> dict:
     '''

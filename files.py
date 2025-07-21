@@ -103,39 +103,42 @@ class feature_main_window:
             subset = self.db.children(id = named_parent)
             self.clear_features()
         else:
-            subset = self.db.region(seqid = self.sequence_name, start = start, end = end)
+            subset = self.db.region(seqid = self.sequence_name,\
+                                    start = start, end = end)
         # subset is an iterable of 'feature' objects
         # it may be faster to implement some way to iterate through
         # subset when rendering features to the screen, but I'll try
         # this out for now while I work on the 'features' window
-        features_orig, buffer = [], []
 
-        #save it to disk
+        #save it to disk from the database query
+        queried_features, buffered_feat_dict = [], []
         for x in subset:
-            features_orig.append(x)
+            queried_features.append(x)
 
-        for offset in range(len(features_orig)):
-            feature = features_orig[offset]
+        # run through the feature and pull pertinent info onto a
+        # dictionary
+        for offset in range(len(queried_features)):
+            feature = queried_features[offset]
 
-            buffer.append({'id':feature.id, 'start':feature.start,\
-                           'end':feature.end, 'col':None, 'tiles':None,\
+            buffered_feat_dict.append({'id':feature.id,\
+                           'start':feature.start,'end':feature.end,\
+                           'col':None, 'tiles':None,\
                            'featuretype':feature.featuretype,\
                            'name':feature.attributes.get('Name'),\
                            'product':feature.attributes.get('product'),\
                            'parent':feature.attributes.get('Parent'),\
                            'strand':feature.strand})
 
-        for buffered_feature in buffer:
-            if any(buffered_feature['id'] == l['id'] for l in self.features):
-                pass
-            else:
+        for buffered_feature in buffered_feat_dict:
+            if not any(buffered_feature['id'] == existing_feat['id']\
+                       for existing_feat in self.features):
                 if SHOW_ALL_FEATURES:
                     self.features.append(buffered_feature)
                 elif buffered_feature['featuretype'] in select_featuretypes:
                     self.features.append(buffered_feature)
 
         for feature in self.features.copy():
-            if any(feature['id'] == b['id'] for b in buffer):
+            if any(feature['id'] == b['id'] for b in buffered_feat_dict):
                 pass
             else:
                 self.features.remove(feature)
