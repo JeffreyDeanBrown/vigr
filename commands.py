@@ -177,7 +177,6 @@ def check_ex_commands(cmd): #cmd comes in as a character string
     if cmd in ex_commands:
         run_it = ex_commands[cmd]
         run_it()
-    # cmd is an int, or comma delimited int, or on "bp","kbp","mbp" scale
     elif parse_comma_bp(cmd):
         set_dna(parse_comma_bp(cmd))
     # starts with "scale"

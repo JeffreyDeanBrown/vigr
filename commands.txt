@@ -1,0 +1,9 @@
+CURRENT CONTROLS AND COMMANDS:
+move up/down: mouse wheel, arrow keys, "j"/"k"
+move to begging: g
+move to the end: G
+Go back to prev: [CTRL] + O
+zoom in: z
+
+ex commands (activated with ":"):
+

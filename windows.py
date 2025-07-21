@@ -259,6 +259,8 @@ def load_popup(text = "", label = "", _list = None):
     wPOPUP_W = curses.COLS - 4
     wPOPUP_ROWS = wPOPUP_H - 2 - 1 #borders and dont-draw-over
     wPOPUP_COLS = wPOPUP_W - 2 - 1 #ditto
+    if wPOPUP_H < 3: return
+    if wPOPUP_W < 5: return
 
     if _list: # a list needs to be sorted by columns and reorganized
 
@@ -293,10 +295,13 @@ def load_popup(text = "", label = "", _list = None):
             for col in _list_by_col:
                 string = string + col[i] + " "
             if len(string) > text_cols:
-                string = string[:text_rows-5] + "...!!"
+                string = string[:text_cols-5] + "...!!"
             _list_by_row.append(string)
             i += 1
 
+        if len(_list_by_row) > text_rows:
+            _list_by_row = _list_by_row[:text_rows]
+            _list_by_row[text_rows] = "Terminal too small!"
         text = "\n".join(_list_by_row) # all together now
 
     #render the popup border and write the label
