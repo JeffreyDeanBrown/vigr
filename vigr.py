@@ -34,7 +34,6 @@ from curses_utils import vigrscr
 
 # FIXME:
 
-#   -updating window size isn't doing anything sometimes, or is incomplete
 #-----------------------------------------------------------------------
 
 def debug(stdscr):
@@ -50,12 +49,15 @@ def main(stdscr):
     # initial setup
     curses.echo()
     curses.curs_set(0) # set cursor to invisible
-    render_screen()
+    load_windows()
 
     #main loop
     while True:
         curses.curs_set(0) # set cursor to invisible
         key = vigrscr.get_key() # wait for user input
+
+#       if key == curses.KEY_RESIZE:
+#           render_screen()
 
         if key in commands.vigr_commands:
             commands.check_vigr_commands(key)
@@ -72,31 +74,34 @@ def main(stdscr):
                 break # thank you have nice day
             else:
                 commands.check_ex_commands(ex)
+
         render_screen() # apply changes
         # The changes are setup and applied starting next loop
 
 #----------------------------------------------------------------------
 
+def render_screen():
+    curses.update_lines_cols()
+    commands.scale_dna(0) #updates the scale
+
+    # check if window is large enough
+    if curses.LINES < 6 or curses.COLS < 60:
+        pass
+    else:
+        load_windows()
+
+#----------------------------------------------------------------------
+
 # load_cmd is always the bottom row, other windows load from
 # left to right in the order that they are loaded
-def render_screen():
-    #update to current terminal size
-    curses.update_lines_cols()
-    # check if window is large enough
-    if curses.LINES < 6 or curses.COLS < 50:
-        curses.doupdate()
-        return
-
-    curses.update_lines_cols()
-    # check if window is large enough
-    commands.scale_dna(0) # update dna scale
-    # load the windows
+def load_windows():
+    vigrscr.stdscr.noutrefresh()
     windows.load_strand()
     windows.load_dna()
     windows.load_main_window()
     windows.load_cmd(refresh_only = True) #keep the command line as is
-    vigrscr.stdscr.noutrefresh()
     curses.doupdate()
 
+#----------------------------------------------------------------------
 
 curses.wrapper(main)
