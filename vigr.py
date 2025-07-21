@@ -52,6 +52,7 @@ def main(stdscr):
     curses.echo()
     curses.curs_set(0) # set cursor to invisible
     render_windows()
+    resize_screen()
 
     #main loop
     while True:

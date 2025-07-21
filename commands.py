@@ -1,9 +1,10 @@
-import files, textart, windows, curses_utils
+import files, textart, windows, curses_utils, math
 import re, curses, typing
 
 last_position = 1
 last_scale = 1
 DEFAULT_SCALE = 10000
+round_up_mvmt = False
 
 def set_dna(index_, memory = True):
     global last_position
@@ -41,11 +42,20 @@ def scale_dna(range_, reset = True):
     # FIXME:
     #       -make a "full sequence" subroutine and make this a call to that routine
 
+    # if the scale is > than the sequence, the scale is set = sequence
     if textart.dna.offset >= files.file.sequence_length:
         textart.dna.index = 1
         textart.dna.offset = files.file.sequence_length - 1
+    # if the scale extends beyond the sequence, the index is "moved back"
+    # to accomidate the large scale
     if (textart.dna.index + textart.dna.offset) > files.file.sequence_length:
         textart.dna.index = files.file.sequence_length - textart.dna.offset
+
+    # set the scale and index to a close number that is evenly divisible
+    # by the number of lines to prevent jitteriness from over or under
+    # moving when calling up() or down()
+    textart.dna.offset = ((textart.dna.offset + 1)//windows.DNA_STRING_H)\
+                          * windows.DNA_STRING_H
 
     files.file.reset_cols()
 

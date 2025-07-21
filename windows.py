@@ -162,8 +162,17 @@ def load_main_window():
 
         #_index is the starting row
         _index = _scaled['scaled_index'] + 1 #line up with border
+
         #_offset_list is a list of rows to fill in
-        _offset_list = list(range(_scaled['scaled_offset'] + 1))
+        # to reduce jitteriness, features will try to maintain the
+        # same length (i.e. offset)
+        if _upper_cutoff or _lower_cutoff:
+            _offset_list = list(range(_scaled['scaled_offset'] + 1))
+        elif not feature['offset_list']:
+            feature['offset_list'] = list(range(_scaled['scaled_offset'] + 1))
+            _offset_list = feature['offset_list'].copy()
+        else:
+            _offset_list = feature['offset_list'].copy()
 
     #<<< CREATE FEATURE <<<
 

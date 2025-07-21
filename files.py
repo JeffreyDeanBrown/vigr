@@ -127,7 +127,7 @@ class feature_main_window:
                            'name':feature.attributes.get('Name'),\
                            'product':feature.attributes.get('product'),\
                            'parent':feature.attributes.get('Parent'),\
-                           'strand':feature.strand, 'offset':0})
+                           'strand':feature.strand, 'offset_list':[]})
 
         for buffered_feature in buffered_feat_dict:
             if not any(buffered_feature['id'] == existing_feat['id']\
