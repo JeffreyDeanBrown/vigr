@@ -262,6 +262,8 @@ def load_popup(text = "", label = "", _list = None):
     if wPOPUP_H < 3: return
     if wPOPUP_W < 5: return
 
+    #>>> sorting and organizing a list >>>i
+
     if _list: # a list needs to be sorted by columns and reorganized
 
         text_cols = wPOPUP_COLS
@@ -303,6 +305,8 @@ def load_popup(text = "", label = "", _list = None):
             _list_by_row = _list_by_row[:text_rows]
             _list_by_row[text_rows] = "Terminal too small!"
         text = "\n".join(_list_by_row) # all together now
+
+    #<<< sorting and organizing a list <<<
 
     #render the popup border and write the label
     w_popup = curses.newwin(wPOPUP_H, wPOPUP_W, 3, 3)
