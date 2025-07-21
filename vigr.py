@@ -5,9 +5,9 @@ import windows, commands
 from curses_utils import vigrscr
 
 #-----------------------------------------------------------------------
-
 # TODO:
-
+#
+#   -parse .gff files which have fasta appended on the end
 #   -reformat commands.py to make it easier to see commands
 #   -:h[elp] function and $ vigr.py -h[elp]
 #   -setup installation script with venv stuff
@@ -16,24 +16,26 @@ from curses_utils import vigrscr
 #   -reformat like you mean it
 #   -make sure ex command names make sense, add shortcuts
 #   -add docstring to everything
-#   -annotate function types + argument types
-#   - :select all & children none
+#   -annotate function types + argument types?
 #   -clear out all FIXMEs
 #
 #   POTENTIAL ADDITIONS:
-#   -selecting features (mouse, arrow keys) and writing that name over others
-#   -also show parent when showing children & label screen w/parent name
 #   -add major and minor axis lines to strand ruler + labels
-#   -implement subroutine for getting messages to user
-#   -parse .gff files which have fasta appended on the end
+#   -also show parent when showing children & label screen w/parent name
+#   -implement subroutine for getting messages to user (just center
+#       text in a popup)
 #
 #   WHEN I SOMEHOW GET A LOT OF FREE TIME AND NEED SOMETING TO DO:
+#   -selecting features (mouse, arrow keys) and writing that name over others
 #   -implement tab autocomplete + ex_command history scrolling
 #   -search using / + regex, g/re/p across all sequences in gff
 #   -implement browsing or comparing multiple parent/children trees
-
+#
 # FIXME:
-
+#   -fix jumps due to changes in offset and maybe index
+#   -weird flashing glitch when shrinking screen in both x and y too fast
+#   -crashes when too small (not catching size excemptions)
+#
 #-----------------------------------------------------------------------
 
 def debug(stdscr):
@@ -84,12 +86,10 @@ def main(stdscr):
 
 def resize_screen():
     curses.update_lines_cols()
-    commands.scale_dna(0) #updates the scale
+    commands.scale_dna(0) #updates the scale, will also update features
 
     # check if window is large enough
-    if curses.LINES < 6 or curses.COLS < 60:
-        pass
-    else:
+    if curses.LINES > 6 and curses.COLS > 60:
         render_windows()
 
 #----------------------------------------------------------------------
