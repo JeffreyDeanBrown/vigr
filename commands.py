@@ -163,14 +163,20 @@ def set_children(parent):
 
 def reset_constraints():
     files.named_parent = None
-    files.select_featuretypes = ['gene']
+    select_feature_types('')
     files.SHOW_ALL_FEATURES = True
     files.CHILDREN_ONLY = False
+
+def help_menu():
+    with open('help.txt', 'r') as help_file:
+        help_string = help_file.read()
+    windows.load_notepad(text = help_string, label = "  Help Menu  ")
 
 
 ex_commands = {'zoom':scale_toggle,
                'seqs': popup_seqids,
-               'reset':reset_constraints}
+               'reset':reset_constraints,
+               'help':help_menu}
 
 vigr_commands = {ord('j'):down,
                  ord('k'):up,
@@ -179,7 +185,8 @@ vigr_commands = {ord('j'):down,
                  ord('g'):beggining,
                  ord('G'):end,
                  15:go_back, # ^O
-                 ord('z'):scale_toggle}
+                 ord('z'):scale_toggle,
+                 ord('h'):help_menu}
 
 
 def check_ex_commands(cmd): #cmd comes in as a character string

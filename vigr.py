@@ -7,9 +7,6 @@ from curses_utils import vigrscr
 #-----------------------------------------------------------------------
 # TODO:
 #
-#   -parse .gff files which have fasta appended on the end
-#   -reformat commands.py to make it easier to see commands
-#   -:h[elp] function and $ vigr.py -h[elp]
 #   -setup installation script with venv stuff
 #
 #   PRE-RELEASE CHECKLIST:
@@ -32,6 +29,8 @@ from curses_utils import vigrscr
 #   -implement browsing or comparing multiple parent/children trees
 #
 # FIXME:
+#   -fix -t "test" mode
+#   -z toggling doesn't go all the way to big_dna if used twice
 #   -cutoff features (rarely) extend by 1 line when scrolling
 #   -weird flashing glitch when shrinking screen in both x and y too fast
 #   -crashes when resized too small too fast (sometimes)

@@ -351,6 +351,51 @@ def load_popup(text = "", label = "", _list = None):
 
 #-----------------------------------------------------------------------
 
+
+def load_notepad(text = "", label = ""):
+
+    # popup window widths
+    wNOTEPAD_H = curses.LINES - 5 # 1 for load_cmd, 4 for a gap
+    wNOTEPAD_W = curses.COLS - 4
+    wNOTEPAD_ROWS = wNOTEPAD_H - 2 - 1 #borders and dont-draw-over
+    wNOTEPAD_COLS = wNOTEPAD_W - 2 - 1 #ditto
+    if wNOTEPAD_H < 3: return
+    if wNOTEPAD_W < 5: return
+
+    text_rows = wNOTEPAD_ROWS
+    text_cols = wNOTEPAD_COLS
+
+    pad_height = text.count('\n') + 1
+    pad_width = 90
+
+    #render the notepad border and write the label
+    w_notepad = curses.newwin(wNOTEPAD_H, wNOTEPAD_W, 3, 3)
+    w_notepad.border()
+    w_notepad.addstr(0, 3, label)
+    w_notepad.noutrefresh()
+    #render the notepad (main message) on top of the border
+    w_notepad_text = curses.newpad(pad_height, pad_width)
+    w_notepad_text.addstr(text)
+
+    # scrolling function for the notepad
+    pad_pos = 0
+    while True:
+        w_notepad_text.noutrefresh(pad_pos, 0, 4, 4, text_rows + 4, text_cols)
+        key = vigrscr.get_key()
+
+        if key in [curses.KEY_UP, ord('k')]:
+            if pad_pos > 0:
+                pad_pos -= 1
+        elif key in [curses.KEY_DOWN, ord('j')]:
+            if pad_pos < pad_height - text_rows:
+                pad_pos += 1
+        else:
+            break
+
+
+#-----------------------------------------------------------------------
+
+
 def load_cmd(input = None, refresh_only = False):
     w_cmd = curses.newwin(1, curses.COLS, curses.LINES-1, 0)
     if refresh_only: # keep the cmd line as it is

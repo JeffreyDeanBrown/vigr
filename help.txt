@@ -1,0 +1,53 @@
+
+SYNOPSIS
+  vigr.py [GFF_FILE] [OPTIONS]
+  vigr.py [OPTIONS]
+  vigr.py -t
+
+
+DESCRIPTION
+  Vi-like GFF Reader
+  a simple terminal-based program for viewing GFF files, focusing on 
+  gene sequencing analysis results. Typical use case is viewing genes in 
+  annotated contigs.
+
+
+OPTIONS
+  -h        outputs this menu
+
+  -g [...]  name of a GFF file to view
+
+  -f [...]  name of an nucleic acid FASTA file to pair with the GFF file
+            (allows for viewing the actual sequence when zoomed in)
+
+  -t        TEST MODE: loads a test eukaryotic gene to try out
+            (specifically CG11023 from 2L of Drosophila melanogaster,
+             which comes pre-loaded with gffutils: 
+             https://daler.github.io/gffutils/index.html )
+
+
+CURRENT CONTROLS AND COMMANDS:
+  h             : help (this menu)
+  scroll wheel, : move up/down
+  arrow keys,
+  j/k
+  gg            : move to begging of sequence
+  G             : move to the end
+  Ctrl + O      : Go back to previous location
+  z             : zoom in/out (toggle), identical to :zoom
+
+
+EX COMMANDS (activated with ":"):
+  help           : this menu
+  seqs           : sequences available in this GFF file
+  seq [...]      : select a sequence from the seqs list (the seq number in 
+                   the list, not the name)
+  type [...]     : limit display to listed type(s), comma or space delimited
+  children [...] : shows the children of named feature. The name is outside of 
+                   the parenthesis, ex: CDS: name(description of gene) 
+  reset          : resets all children and type constraints
+  zoom           : zoom in/out (toggle), identical to z
+  [interger]     : move to this location, can be comma delimited. Recognizes
+                   the labels "bp","kbp","mbp" 
+                   (i.e. "10kbp" = 10,000 = 10000bp, etc)
+  space [...]    : change the spacing of features to entered # of columns

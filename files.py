@@ -16,13 +16,21 @@ except:
     sys.exit("ERROR: no arguments given!\n"\
              "\ttype 'vigr.py -h' for help\n")
 else:
-    if re.match(".*\.gff", sys.argv[1]):
+
+    if '-t' in sys.argv:
+        DO_TEST = True
+
+    if '-h' in sys.argv:
+        with open('help.txt', 'r') as help_file:
+            print(help_file.read())
+            sys.exit() #adios!
+    elif re.match(".*\.gff", sys.argv[1]):
         gff_file = sys.argv[1]
     elif '-g' in sys.argv:
         _index = sys.argv.index('-g') + 1
         if re.match(".*\.gff", sys.argv[_index]):
             gff_file = sys.argv[_index]
-    else:
+    elif not DO_TEST:
         sys.exit("ERROR: no .gff file provided!\n"
                  "\tPlease provide a .gff file using the following format:\n\n"\
                  "\t\t'vigr.py [file]' -or- 'vigr.py -g [file]'\n")
@@ -31,19 +39,6 @@ else:
         _index = sys.argv.index('-f') + 1
         fasta_file = sys.argv[_index]
         HAS_FASTA = True
-
-    if '-t' in sys.argv:
-        DO_TEST = True
-
-    if '-s' in sys.argv:
-        SHOW_ALL_FEATURES = False
-        try:
-            _index = sys.argv.index('-s') + 1
-            test = sys.argv[_index]
-        except:
-            pass
-        else:
-            select_featuretypes = sys.argv[_index]
 
 #-----------------------------------------------------------------------
 
