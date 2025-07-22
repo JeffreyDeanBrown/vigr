@@ -5,6 +5,7 @@ import textart
 from Bio.Seq import Seq
 from curses_utils import vigrscr
 
+
 #-----------------------------------------------------------------------
 
 
@@ -246,6 +247,8 @@ def load_main_window():
     #>>> label feature >>>
 
     for feature in files.file.features:
+        if feature['tiles'] == None:
+            continue # that feature was not printed
         start, end = feature['tiles']
         if feature['name']:
             name = feature['name'][0]

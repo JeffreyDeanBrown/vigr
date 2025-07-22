@@ -4,7 +4,7 @@ import re, curses, typing
 last_position = 1
 last_scale = 1
 DEFAULT_SCALE = 10000
-round_up_mvmt = False
+toggled_zoom = False
 
 def set_dna(index_, memory = True):
     global last_position
@@ -36,11 +36,10 @@ def scale_dna(range_, reset = True):
         textart.dna.offset = range_
 
     if reset:
-        global last_scale
+        global last_scale, toggled_zoom
         last_scale = 1
+        toggled_zoom = False
 
-    # FIXME:
-    #       -make a "full sequence" subroutine and make this a call to that routine
 
     # if the scale is > than the sequence, the scale is set = sequence
     if textart.dna.offset >= files.file.sequence_length:
@@ -49,13 +48,14 @@ def scale_dna(range_, reset = True):
     # if the scale extends beyond the sequence, the index is "moved back"
     # to accomidate the large scale
     if (textart.dna.index + textart.dna.offset) > files.file.sequence_length:
-        textart.dna.index = files.file.sequence_length - textart.dna.offset
+        textart.dna.index = files.file.sequence_length - textart.dna.offset - 1
 
-    # set the scale and index to a close number that is evenly divisible
-    # by the number of lines to prevent jitteriness from over or under
-    # moving when calling up() or down()
-    textart.dna.offset = ((textart.dna.offset + 1)//windows.DNA_STRING_H)\
-                          * windows.DNA_STRING_H
+    if not toggled_zoom:
+        # set the scale and index to a close number that is evenly divisible
+        # by the number of lines to prevent jitteriness from over or under
+        # moving when calling up() or down()
+        textart.dna.offset = ((textart.dna.offset + 1)//windows.DNA_STRING_H)\
+                              * windows.DNA_STRING_H
 
     files.file.reset_cols()
 
@@ -108,7 +108,11 @@ def go_back():
     set_dna(_buffer)
 
 def scale_toggle():
-    global last_scale
+    global last_scale, toggled_zoom
+    if toggled_zoom:
+        toggled_zoom = False
+    else:
+        toggled_zoom = True
     _buffer, last_scale = last_scale, textart.dna.offset
     scale_dna(_buffer, reset = False)
 

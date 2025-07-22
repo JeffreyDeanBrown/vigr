@@ -95,7 +95,8 @@ class feature_main_window:
 
         # get db within screen region
         if CHILDREN_ONLY:
-            subset = self.db.children(id = named_parent)
+            subset = self.db.children(id = named_parent,\
+                                      order_by = 'featuretype')
             self.clear_features()
         else:
             subset = self.db.region(seqid = self.sequence_name,\

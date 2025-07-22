@@ -29,8 +29,7 @@ from curses_utils import vigrscr
 #   -implement browsing or comparing multiple parent/children trees
 #
 # FIXME:
-#   -fix -t "test" mode
-#   -z toggling doesn't go all the way to big_dna if used twice
+#   -crashes if you extend the scale while at the bottom of the sequence
 #   -cutoff features (rarely) extend by 1 line when scrolling
 #   -weird flashing glitch when shrinking screen in both x and y too fast
 #   -crashes when resized too small too fast (sometimes)
