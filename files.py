@@ -139,10 +139,6 @@ class feature_main_window:
             else:
                 self.features.remove(feature)
 
-    def reset_cols(self):
-        for feature in self.features:
-            feature['col'] = 0
-
     def clear_features(self):
         self.features = []
 

@@ -6,6 +6,14 @@ last_scale = 1
 DEFAULT_SCALE = 10000
 toggled_zoom = False
 
+#----------------------------------------------------------------------
+def debug():
+    curses.nocbreak()
+    curses.echo()
+    curses.endwin()
+    breakpoint()
+#----------------------------------------------------------------------
+
 def set_dna(index_, memory = True):
     global last_position
 
@@ -45,19 +53,22 @@ def scale_dna(range_, reset = True):
     if textart.dna.offset >= files.file.sequence_length:
         textart.dna.index = 1
         textart.dna.offset = files.file.sequence_length - 1
+
+    if not toggled_zoom:
+        # set the scale and index to closest number that is evenly divisible
+        # by the number of lines to prevent jitteriness from over or under
+        # scrolling when calling up() or down()
+        even_bp_per_row = (textart.dna.offset + 1)//windows.DNA_STRING_H
+        even_bp_on_screen = even_bp_per_row * windows.DNA_STRING_H
+        textart.dna.offset = even_bp_on_screen
+
     # if the scale extends beyond the sequence, the index is "moved back"
     # to accomidate the large scale
     if (textart.dna.index + textart.dna.offset) > files.file.sequence_length:
-        textart.dna.index = files.file.sequence_length - textart.dna.offset - 1
+        textart.dna.index = files.file.sequence_length - textart.dna.offset
 
-    if not toggled_zoom:
-        # set the scale and index to a close number that is evenly divisible
-        # by the number of lines to prevent jitteriness from over or under
-        # moving when calling up() or down()
-        textart.dna.offset = ((textart.dna.offset + 1)//windows.DNA_STRING_H)\
-                              * windows.DNA_STRING_H
 
-    files.file.reset_cols()
+    files.file.clear_features()
 
     if textart.dna.offset <= (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
         textart.dna.offset = (curses.LINES - 3) - 1
@@ -141,7 +152,7 @@ def space_features(space):
         space = int(space)
         if space > 0:
             windows.FEATURE_SPACING = space
-            files.file.reset_cols()
+            files.file.clear_features()
 
 def select_feature_types(selection):
     if selection:

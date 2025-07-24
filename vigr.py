@@ -11,7 +11,6 @@ from curses_utils import vigrscr
 #
 #   PRE-RELEASE CHECKLIST:
 #   -reformat like you mean it
-#   -make sure ex command names make sense, add shortcuts
 #   -add docstring to everything
 #   -annotate function types + argument types?
 #   -clear out all FIXMEs
@@ -23,14 +22,13 @@ from curses_utils import vigrscr
 #       text in a popup)
 #
 #   WHEN I SOMEHOW GET A LOT OF FREE TIME AND NEED SOMETING TO DO:
+#   -cutoff features (rarely) extend by 1 line causing jitter
 #   -selecting features (mouse, arrow keys) and writing that name over others
 #   -implement tab autocomplete + ex_command history scrolling
 #   -search using / + regex, g/re/p across all sequences in gff
 #   -implement browsing or comparing multiple parent/children trees
 #
 # FIXME:
-#   -crashes if you extend the scale while at the bottom of the sequence
-#   -cutoff features (rarely) extend by 1 line when scrolling
 #   -weird flashing glitch when shrinking screen in both x and y too fast
 #   -crashes when resized too small too fast (sometimes)
 #

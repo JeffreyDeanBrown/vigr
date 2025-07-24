@@ -21,7 +21,7 @@ from curses_utils import vigrscr
 wSTRAND_RULER_W = 11
 wSTRAND_W = textart.strand.w + wSTRAND_RULER_W + 2 # 2 extra for the border
 wDNA_RULER_W = 9 # just 9 for value (max: xx,xxxkbp)
-wDNA_W =  6 # current largest DNA text art is 5 wide
+wDNA_W =  6 # current largest DNA text art is 5 wide (ex. |C G| )
 
 
 # window positions (furthest left column)
@@ -38,7 +38,7 @@ FEATURE_SPACING = 10
 
 def load_dna():
 
-    wDNA_H = curses.LINES - 1 # 1 to line up w/border
+    wDNA_H = curses.LINES - 1 # 1 to line up w/border, starting at y = 1
     global DNA_STRING_H
     DNA_STRING_H = wDNA_H - 2 # line up w/top + bottom borders
     dna_ruler_min = basepair_format(textart.dna.index)
