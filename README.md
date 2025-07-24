@@ -5,10 +5,14 @@ A simple command-line .gff file reader for quicky perusing through sequencing da
 ## Demo
 ![](https://github.com/JeffreyDeanBrown/vigr/blob/master/resource/vigr_demo.gif)
 
-# WIP
 
 ## notes
 
-currently requires biopython
-(biopython version 184 suggests python 3.11, may work wth 3.12, does NOT work with 3.13)
+requires python 3.11 with biopython and gffutils packages
+
+## how to use VIGR
+
+`vigr.py -h`
+or
+`:help` in the vigr interface both link to [this help file](help.txt)
 

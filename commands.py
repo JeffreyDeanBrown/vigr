@@ -22,26 +22,29 @@ def set_dna(index_, memory = True):
 
     if index_:
         if memory:
-            last_position = textart.dna.index
-        textart.dna.index = index_
+            last_position = textart.little_ladder.index
+        textart.little_ladder.index = index_
 
-    if textart.dna.index >= files.file.sequence_length:
-        textart.dna.index = files.file.sequence_length - textart.dna.offset
-    if (textart.dna.index + textart.dna.offset) > files.file.sequence_length:
-        textart.dna.offset = files.file.sequence_length - textart.dna.index
+    if textart.little_ladder.index >= files.file.sequence_length:
+        textart.little_ladder.index = files.file.sequence_length - textart.little_ladder.offset
+    if (textart.little_ladder.index + textart.little_ladder.offset) > files.file.sequence_length:
+        textart.little_ladder.offset = files.file.sequence_length - textart.little_ladder.index
         scale_dna(0) # scale string art, but don't change offset
 
 
 
 # dna string from windows is curses.LINES - 3
-
+#TODO: rename scale_dna, possibly the name of offsets, and see if I can
+#      use the height of a window instead of curses.LINES - 3,
+#      *** set an option refresh = False or something instead of always
+#      calling scale_dna(0)
 def scale_dna(range_, reset = True):
     #prevent setting a scale of 0 or None
     # optional use: scale_dna(0) will resize dna chars without changing the offset
     if range_:
         if range_ < 0:
             range_ = 1
-        textart.dna.offset = range_
+        textart.little_ladder.offset = range_
 
     if reset:
         global last_scale, toggled_zoom
@@ -50,28 +53,31 @@ def scale_dna(range_, reset = True):
 
 
     # if the scale is > than the sequence, the scale is set = sequence
-    if textart.dna.offset >= files.file.sequence_length:
-        textart.dna.index = 1
-        textart.dna.offset = files.file.sequence_length - 1
+    if textart.little_ladder.offset >= files.file.sequence_length:
+        textart.little_ladder.index = 1
+        textart.little_ladder.offset = files.file.sequence_length - 1
 
     if not toggled_zoom:
         # set the scale and index to closest number that is evenly divisible
         # by the number of lines to prevent jitteriness from over or under
         # scrolling when calling up() or down()
-        even_bp_per_row = (textart.dna.offset + 1)//windows.DNA_STRING_H
+        even_bp_per_row = (textart.little_ladder.offset + 1)//windows.DNA_STRING_H
         even_bp_on_screen = even_bp_per_row * windows.DNA_STRING_H
-        textart.dna.offset = even_bp_on_screen
+        textart.little_ladder.offset = even_bp_on_screen
 
     # if the scale extends beyond the sequence, the index is "moved back"
     # to accomidate the large scale
-    if (textart.dna.index + textart.dna.offset) > files.file.sequence_length:
-        textart.dna.index = files.file.sequence_length - textart.dna.offset
+    if (textart.little_ladder.index + textart.little_ladder.offset) > files.file.sequence_length:
+        textart.little_ladder.index = files.file.sequence_length - textart.little_ladder.offset
 
 
-    files.file.clear_features()
+    files.file.clear_features() # clear out current features so they update
 
-    if textart.dna.offset <= (curses.LINES - 3) - 1: # (textart.dna_STRING_H) - 1 for index
-        textart.dna.offset = (curses.LINES - 3) - 1
+    # if a very small scale is applied, make the scale = to the height
+    # of the main window
+    #TODO
+    if textart.little_ladder.offset <= (curses.LINES - 3) - 1: # (textart.little_ladder_STRING_H) - 1 for index
+        textart.little_ladder.offset = (curses.LINES - 3) - 1
         if files.HAS_FASTA:
             big_dna()
         else:
@@ -81,28 +87,28 @@ def scale_dna(range_, reset = True):
 
 
 def small_dna():
-    textart.dna.update_text(new_text = "┠┨\n")
-    textart.dna.not_zoom()
+    textart.little_ladder.update_text(new_text = "┠┨\n")
+    textart.little_ladder.is_zoom = False
 
 def medium_dna():
-    textart.dna.update_text("├┄┤\n")
-    textart.dna.not_zoom()
+    textart.little_ladder.update_text("├┄┤\n")
+    textart.little_ladder.is_zoom = False
 
 def big_dna():
-    textart.dna.update_text("┣X X┫\n")
-    textart.dna.is_zoom()
+    textart.little_ladder.update_text("┣X X┫\n")
+    textart.little_ladder.is_zoom = True
 
 def down():
-    _increment = round((textart.dna.offset + 1)/windows.DNA_STRING_H)
-    _move_to = textart.dna.index + _increment
-    if textart.dna.index + textart.dna.offset + _increment > files.file.sequence_length:
+    _increment = round((textart.little_ladder.offset + 1)/windows.DNA_STRING_H)
+    _move_to = textart.little_ladder.index + _increment
+    if textart.little_ladder.index + textart.little_ladder.offset + _increment > files.file.sequence_length:
         return
     else:
         set_dna(_move_to, memory = False)
 
 def up():
-    _increment = round((textart.dna.offset + 1)/windows.DNA_STRING_H)
-    _move_to = textart.dna.index - _increment
+    _increment = round((textart.little_ladder.offset + 1)/windows.DNA_STRING_H)
+    _move_to = textart.little_ladder.index - _increment
     set_dna(_move_to, memory = False)
 
 def beggining():
@@ -115,7 +121,7 @@ def end():
 
 def go_back():
     global last_position
-    _buffer, last_position = last_position, textart.dna.index
+    _buffer, last_position = last_position, textart.little_ladder.index
     set_dna(_buffer)
 
 def scale_toggle():
@@ -124,7 +130,7 @@ def scale_toggle():
         toggled_zoom = False
     else:
         toggled_zoom = True
-    _buffer, last_scale = last_scale, textart.dna.offset
+    _buffer, last_scale = last_scale, textart.little_ladder.offset
     scale_dna(_buffer, reset = False)
 
 def popup_seqids():

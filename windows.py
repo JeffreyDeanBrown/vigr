@@ -9,27 +9,36 @@ from curses_utils import vigrscr
 #-----------------------------------------------------------------------
 
 
+
 # (diagram not to scale)
-# (w_strand has a border, which takes up 2 columns)
 #
-# <------------wSTRAND_W--------------><--wDNA_RULER_W--><--wDNA_W--><--MAIN_WINDOW_W-->> (the rest)
-# │<--------(wSTRAND_W - 2)---------->│
-# │<--strand.w--><--wSTRAND_RULER_W-->│
+# <------------HELIX_W--------------><--DNA_RULER_W--><--DNA_W--><--MAIN_WINDOW_W-->> (the rest)
+# │<--inside border (HELIX_W - 2)--->│
+# │<--helix.w--><---HELIX_RULER_W--->│
+# │  █════██     ┬1bp                │             1bp┠┨
+# │  █══██       │                   │                ┠┨          │ CDS xxy (theoretical gene)
+# │   ██         │                   │                ┠┨          │
+# │  █══██       │                   │                ┠┨          │
+# │  █════██     │                   │                ┠┨          V Ʌ rRNA yyx (theoretical gene)
+# │   ██════█    ┴20kbp              │           15kbp┠┨            │
+#
+#      ^textart.large_helix      textart.little_ladder^
 
+# window widths are marked with a W (WINDOW_W) and the position of the
+# left-most edge is marked with an X (WINDOW_X)
 
-# window widths
-wSTRAND_RULER_W = 11
-wSTRAND_W = textart.strand.w + wSTRAND_RULER_W + 2 # 2 extra for the border
-wDNA_RULER_W = 9 # just 9 for value (max: xx,xxxkbp)
-wDNA_W =  6 # current largest DNA text art is 5 wide (ex. |C G| )
+HELIX_RULER_W = 11 # up to xx,xxxkbp (1 space + 9 wide + 1 for the border)
+HELIX_W = textart.large_helix.w + HELIX_RULER_W + 2 # 2 extra for the border
+DNA_RULER_W = 9 # just 9 for value (max: xx,xxxkbp)
+DNA_W =  6 # current largest DNA text art is 5 wide (ex. |C G| )
 
 
 # window positions (furthest left column)
-wSTRAND_X = 0
-wSTRAND_RULER_X = textart.strand.w + 1
-wDNA_RULER_X = wSTRAND_W
-wDNA_X = wDNA_RULER_X + wDNA_RULER_W
-wMAIN_WINDOW_X = wDNA_X + wDNA_W
+HELIX_X = 0
+HELIX_RULER_X = textart.large_helix.w + 1
+DNA_RULER_X = HELIX_W
+DNA_X = DNA_RULER_X + DNA_RULER_W
+MAIN_WINDOW_X = DNA_X + DNA_W
 
 FEATURE_SPACING = 10
 
@@ -38,21 +47,21 @@ FEATURE_SPACING = 10
 
 def load_dna():
 
-    wDNA_H = curses.LINES - 1 # 1 to line up w/border, starting at y = 1
+    DNA_H = curses.LINES - 1 # 1 to line up w/border, starting at y = 1
     global DNA_STRING_H
-    DNA_STRING_H = wDNA_H - 2 # line up w/top + bottom borders
-    dna_ruler_min = basepair_format(textart.dna.index)
-    dna_ruler_max = basepair_format(textart.dna.index+textart.dna.offset)
+    DNA_STRING_H = DNA_H - 2 # line up w/top + bottom borders
+    dna_ruler_min = basepair_format(textart.little_ladder.index)
+    dna_ruler_max = basepair_format(textart.little_ladder.index+textart.little_ladder.offset)
 
     #start window at y = 1 to line up with border
-    w_dna = curses.newwin(wDNA_H, wDNA_W, 1, wDNA_X)
-    w_dna.addstr(textart.dna.fill(DNA_STRING_H))
+    w_dna = curses.newwin(DNA_H, DNA_W, 1, DNA_X)
+    w_dna.addstr(textart.little_ladder.fill(DNA_STRING_H))
 
     #parse nucleotides
-    if textart.dna.IS_ZOOM:
+    if textart.little_ladder.is_zoom:
         for row in range(DNA_STRING_H):
-            nuc = files.file.sequence[textart.dna.index + row - 1]
-            cnuc = files.file.sequence.complement()[textart.dna.index + row - 1]
+            nuc = files.file.sequence[textart.little_ladder.index + row - 1]
+            cnuc = files.file.sequence.complement()[textart.little_ladder.index + row - 1]
             w_dna.addch(row, 1, nuc)
             w_dna.addch(row, 3, cnuc)
 
@@ -61,7 +70,7 @@ def load_dna():
 
 
     #start window at y = 1 to line up with strand border
-    w_dna_ruler = curses.newwin(wDNA_H, wDNA_RULER_W, 1, wDNA_RULER_X)
+    w_dna_ruler = curses.newwin(DNA_H, DNA_RULER_W, 1, DNA_RULER_X)
     w_dna_ruler.addstr(dna_ruler_min.rjust(9) + "\n"\
                       +"\n".rjust(9) * (DNA_STRING_H - 3)\
                       +dna_ruler_max.rjust(9))
@@ -71,51 +80,51 @@ def load_dna():
 
 def load_strand():
 
-    wSTRAND_H = curses.LINES - 1 # so border isn't cut off by cmd line
-    wSTRAND_ID_H = wSTRAND_H - 2 # inner diameter of border
+    HELIX_H = curses.LINES - 1 # so border isn't cut off by cmd line
+    HELIX_ID_H = HELIX_H - 2 # inner diameter of border
 
 
-    # fills w_strand with strand TxtArt, but cuts off ends and adds border
-    w_strand = curses.newwin(wSTRAND_H, wSTRAND_W, 0, wSTRAND_X)
-    w_strand.addstr(textart.strand.fill(wSTRAND_H))
-    w_strand.border()
+    # fill w_helix with helix art, add a border
+    w_helix = curses.newwin(HELIX_H, HELIX_W, 0, HELIX_X)
+    w_helix.addstr(textart.large_helix.fill(HELIX_H))
+    w_helix.border()
 
-    #labels w_strand with sequence id
-    if len(files.file.sequence_name) > wSTRAND_W - 3:
-        _seq_label = files.file.sequence_name[:(wSTRAND_W-7)] + "..."
+    #labels w_helix with sequence id
+    if len(files.file.sequence_name) > HELIX_W - 3:
+        _seq_label = files.file.sequence_name[:(HELIX_W-7)] + "..."
     else:
         _seq_label = files.file.sequence_name
     #label is in the border for the ~*~aesthetics~*~
-    w_strand.addstr(0, 1, _seq_label)
+    w_helix.addstr(0, 1, _seq_label)
 
 
     strand_ruler_max = basepair_format(files.file.sequence_length)
 
-    # start at y = 1, x = strand.w + 1 to avoid borders
-    w_strand_ruler = curses.newwin(wSTRAND_ID_H, wSTRAND_RULER_W, 1, wSTRAND_RULER_X)
-    w_strand_ruler.addstr("┬1bp\n"\
-                     + "│\n" * (wSTRAND_ID_H - 2)\
+    # start at y = 1, x = helix.w + 1 to avoid borders
+    w_helix_ruler = curses.newwin(HELIX_ID_H, HELIX_RULER_W, 1, HELIX_RULER_X)
+    w_helix_ruler.addstr("┬1bp\n"\
+                     + "│\n" * (HELIX_ID_H - 2)\
                      + "┴" + strand_ruler_max)
 
 
-    _scaled = scale_to_vigr(index = textart.dna.index, offset = textart.dna.offset,\
-                                         char_scale = wSTRAND_ID_H, int_scale = files.file.sequence_length)
+    _scaled = scale_to_vigr(index = textart.little_ladder.index, offset = textart.little_ladder.offset,\
+                                         char_scale = HELIX_ID_H, int_scale = files.file.sequence_length)
 
-    textart.strand.index = _scaled['scaled_index']
-    textart.strand.offset = _scaled['scaled_offset']
+    textart.large_helix.index = _scaled['scaled_index']
+    textart.large_helix.offset = _scaled['scaled_offset']
 
 
     #NOTE TO SELF: list(range(n+1)) returns [0:n]
 
-    # w_strand starts outside border, so start at y = 1, x = 1
-    _offset_list = list(range(textart.strand.offset + 1))
+    # w_helix starts outside border, so start at y = 1, x = 1
+    _offset_list = list(range(textart.large_helix.offset + 1))
     for _offset in  _offset_list:
-        w_strand.chgat(1 + textart.strand.index + _offset, 1, (wSTRAND_W - 2), curses.A_BLINK)
-    #w_strand_ruler starts inside border, so start at y = 0, x = 0
-        w_strand_ruler.chgat(textart.strand.index + _offset, 0, wSTRAND_RULER_W, curses.A_REVERSE)
+        w_helix.chgat(1 + textart.large_helix.index + _offset, 1, (HELIX_W - 2), curses.A_BLINK)
+    #w_helix_ruler starts inside border, so start at y = 0, x = 0
+        w_helix_ruler.chgat(textart.large_helix.index + _offset, 0, HELIX_RULER_W, curses.A_REVERSE)
 
-    w_strand.noutrefresh()
-    w_strand_ruler.noutrefresh()
+    w_helix.noutrefresh()
+    w_helix_ruler.noutrefresh()
 
 
 #-----------------------------------------------------------------------
@@ -123,13 +132,13 @@ def load_strand():
 def load_main_window():
     global w_main_window
 
-    wMAIN_WINDOW_H = curses.LINES - 1
+    MAIN_WINDOW_H = curses.LINES - 1
     PRES_STRING_H = DNA_STRING_H
-    wMAIN_WINDOW_W = curses.COLS - wMAIN_WINDOW_X
+    MAIN_WINDOW_W = curses.COLS - MAIN_WINDOW_X
 
-    files.file.gff_parser(start = textart.dna.index, end = textart.dna.index + textart.dna.offset)
+    files.file.gff_parser(start = textart.little_ladder.index, end = textart.little_ladder.index + textart.little_ladder.offset)
 
-    w_main_window = curses.newwin(wMAIN_WINDOW_H, wMAIN_WINDOW_W, 0, wMAIN_WINDOW_X)
+    w_main_window = curses.newwin(MAIN_WINDOW_H, MAIN_WINDOW_W, 0, MAIN_WINDOW_X)
     w_main_window.clear()
 
     _occupied_tiles = [] # y,x
@@ -142,24 +151,24 @@ def load_main_window():
         _upper_cutoff = False
 
         #check if start of feature is cutoff
-        if feature['start'] < textart.dna.index:
-            _start = textart.dna.index
+        if feature['start'] < textart.little_ladder.index:
+            _start = textart.little_ladder.index
             _lower_cutoff = True
         else:
             _start = feature['start']
 
         #check if end of feature is cutoff
-        if feature['end'] > (textart.dna.index + textart.dna.offset):
-            _end = (textart.dna.index + textart.dna.offset)
+        if feature['end'] > (textart.little_ladder.index + textart.little_ladder.offset):
+            _end = (textart.little_ladder.index + textart.little_ladder.offset)
             _upper_cutoff = True
         else:
             _end = feature['end']
 
         #returns dict {scaled_index:, scaled_offset}
-        _scaled = scale_to_vigr(index = _start - textart.dna.index,\
+        _scaled = scale_to_vigr(index = _start - textart.little_ladder.index,\
                                              offset = _end - _start,\
                                              char_scale = PRES_STRING_H,\
-                                             int_scale = textart.dna.offset + 1)
+                                             int_scale = textart.little_ladder.offset + 1)
 
         #_index is the starting row
         _index = _scaled['scaled_index'] + 1 #line up with border
@@ -192,10 +201,10 @@ def load_main_window():
         for _offset in _offset_list:
             _occupied_tiles.append(((_index+_offset), feature['col']))
 
-        if (feature['col'] + wMAIN_WINDOW_X) >= curses.COLS - 2:
+        if (feature['col'] + MAIN_WINDOW_X) >= curses.COLS - 2:
             # ERROR: too many cols!
-            for row in range(wMAIN_WINDOW_H):
-                w_main_window.addstr(row, wMAIN_WINDOW_W-3,'!!', curses.A_ITALIC)
+            for row in range(MAIN_WINDOW_H):
+                w_main_window.addstr(row, MAIN_WINDOW_W-3,'!!', curses.A_ITALIC)
             continue #don't print that feature
 
     # <<< COLUMN MANAGEMENT <<<
@@ -263,7 +272,7 @@ def load_main_window():
 
         for row in range(start, end+1):
             for char in range(1, len(label)+1):
-                if ((row, feature['col']+char) in _occupied_tiles) or ((feature['col'] + char) >= wMAIN_WINDOW_W):
+                if ((row, feature['col']+char) in _occupied_tiles) or ((feature['col'] + char) >= MAIN_WINDOW_W):
                     can_print = False
                     break
                 else:

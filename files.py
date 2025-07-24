@@ -87,9 +87,9 @@ class feature_main_window:
     def check_sequence_length(self):
         # check if default offset of 10,000bp is an OK size
         if self.sequence_length < 40000:
-            textart.dna.offset = self.sequence_length // 4
+            textart.little_ladder.offset = self.sequence_length // 4
         else:
-            textart.dna.offset = 9999
+            textart.little_ladder.offset = 9999
 
     def gff_parser(self, start, end):
 

@@ -11,6 +11,7 @@ from curses_utils import vigrscr
 #
 #   PRE-RELEASE CHECKLIST:
 #   -reformat like you mean it
+#   -fix ambiguous names
 #   -add docstring to everything
 #   -annotate function types + argument types?
 #   -clear out all FIXMEs
@@ -62,6 +63,7 @@ def main(stdscr):
 
         if key in commands.vigr_commands:
             commands.check_vigr_commands(key)
+
         elif key == ord(":"):
             # setup for : command
             windows.load_cmd(":")
@@ -73,18 +75,19 @@ def main(stdscr):
 
             if curses.is_term_resized(curses.LINES, curses.COLS):
                 resize_screen()
+
             elif ex == 'q':
                 break # thank you have nice day
+
             else:
                 commands.check_ex_commands(ex)
 
         render_windows() # apply changes
-        # The changes are setup and applied starting next loop
 
 #----------------------------------------------------------------------
 
 def resize_screen():
-    curses.update_lines_cols()
+    curses.update_lines_cols() #check current window size
     commands.scale_dna(0) #updates the scale, will also update features
     render_windows()
 
@@ -93,10 +96,14 @@ def resize_screen():
 # load_cmd is always the bottom row, other windows load from
 # left to right in the order that they are loaded
 def render_windows():
+
     # check if window is large enough
     if curses.LINES < 8 or curses.COLS < 60:
         return
+
+    #render the windows
     vigrscr.stdscr.noutrefresh()
+    #TODO rename all the windows to something better
     windows.load_strand()
     windows.load_dna()
     windows.load_main_window()
