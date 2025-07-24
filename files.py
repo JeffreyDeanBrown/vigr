@@ -19,6 +19,7 @@ else:
 
     if '-t' in sys.argv:
         DO_TEST = True
+        gff_file = "testing"
 
     if '-h' in sys.argv:
         with open('help.txt', 'r') as help_file:
