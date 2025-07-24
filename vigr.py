@@ -17,6 +17,8 @@ from curses_utils import vigrscr
 #
 #   POTENTIAL ADDITIONS:
 #   -add major and minor axis lines to strand ruler + labels
+#   -search using / + regex, g/re/p across all sequences in gff
+#   -implement browsing or comparing multiple parent/children trees
 #   -also show parent when showing children & label screen w/parent name
 #   -implement subroutine for getting messages to user (just center
 #       text in a popup)
@@ -25,12 +27,12 @@ from curses_utils import vigrscr
 #   -cutoff features (rarely) extend by 1 line causing jitter
 #   -selecting features (mouse, arrow keys) and writing that name over others
 #   -implement tab autocomplete + ex_command history scrolling
-#   -search using / + regex, g/re/p across all sequences in gff
-#   -implement browsing or comparing multiple parent/children trees
 #
-# FIXME:
+#   BUGS SPECIFIC TO i3 WINDOWED MODE (verified OK in other WMs):
 #   -weird flashing glitch when shrinking screen in both x and y too fast
 #   -crashes when resized too small too fast (sometimes)
+#
+# FIXME:
 #
 #-----------------------------------------------------------------------
 
