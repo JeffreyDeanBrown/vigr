@@ -425,7 +425,7 @@ def basepair_format(unformatted :int) -> str:
         return('{:,}'.format(unformatted) + "bp")
     elif unformatted < 100_000_000:
         return('{:,}'.format(round((unformatted / 1_000)))\
-                  + "kpb")
+                  + "kbp")
     else:
         return(str(round(unformatted / 1_000_000))\
                   + "mpb")
